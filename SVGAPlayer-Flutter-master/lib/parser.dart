@@ -88,40 +88,49 @@ class SVGAParser {
     })).then((_) => movieItem);
   }
 
-  Future<ui.Image?> _decodeImageItem(String key, Uint8List bytes,
-      {TimelineTask? timeline}) async {
-    TimelineTask? task;
-    if (!kReleaseMode) {
-      task = TimelineTask(filterKey: _filterKey, parent: timeline)
-        ..start('DecodeImage', arguments: {'key': key, 'length': bytes.length});
-    }
-    try {
-      final image = await decodeImageFromList(bytes);
-      if (task != null) {
-        task.finish(
-          arguments: {'imageSize': '${image.width}x${image.height}'},
-        );
-      }
-      return image;
-    } catch (e, stack) {
-      if (task != null) {
-        task.finish(arguments: {'error': '$e', 'stack': '$stack'});
-      }
-      assert(() {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: e,
-          stack: stack,
-          library: 'svgaplayer',
-          context: ErrorDescription('during prepare resource'),
-          informationCollector: () sync* {
-            yield ErrorSummary('Decoding image failed.');
-          },
-        ));
-        return true;
-      }());
-      return null;
-    }
+Future<ui.Image?> _decodeImageItem(String key, Uint8List bytes,
+    {TimelineTask? timeline}) async {
+  if (bytes.isEmpty || bytes.length < 10) {
+    log('Image data is empty or too small: $key');
+    return null;
   }
+
+  if (isMP3Data(bytes)) {
+    log('Skipping image decoding for audio file: $key');
+    return null;
+  }
+
+  TimelineTask? task;
+  if (!kReleaseMode) {
+    task = TimelineTask(filterKey: _filterKey, parent: timeline)
+      ..start('DecodeImage', arguments: {'key': key, 'length': bytes.length});
+  }
+
+  try {
+    final image = await decodeImageFromList(bytes);
+    task?.finish(arguments: {'imageSize': '${image.width}x${image.height}'});
+    return image;
+  } catch (e, stack) {
+    task?.finish(arguments: {'error': '$e', 'stack': '$stack'});
+    log('Failed to decode image: $key, error: $e');
+
+    assert(() {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: e,
+        stack: stack,
+        library: 'svgaplayer',
+        context: ErrorDescription('during prepare resource'),
+        informationCollector: () sync* {
+          yield ErrorSummary('Decoding image failed for key: $key.');
+        },
+      ));
+      return true;
+    }());
+
+    return null;
+  }
+}
+
 
   bool isMP3Data(Uint8List data) {
     const mp3MagicNumber = 'ID3';
