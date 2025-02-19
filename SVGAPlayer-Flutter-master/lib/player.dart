@@ -56,6 +56,7 @@ class SVGAImage extends StatefulWidget {
 
 class SVGAAnimationController extends AnimationController {
   MovieEntity? _videoItem;
+  final List<SVGAAudioLayer> _audioLayers = [];
   bool _canvasNeedsClear = false;
 
   SVGAAnimationController({
@@ -88,6 +89,9 @@ class SVGAAnimationController extends AnimationController {
       if (fps == 0) fps = 20;
       duration =
           Duration(milliseconds: (movieParams.frames / fps * 1000).toInt());
+           for (var audio in value.audios) {
+        _audioLayers.add(SVGAAudioLayer(audio, value));
+      }
     } else {
       duration = Duration.zero;
     }
@@ -126,7 +130,13 @@ class SVGAAnimationController extends AnimationController {
         'SVGAAnimationController.forward() called after dispose()?');
     return super.forward(from: from);
   }
-
+  @override
+  void stop({bool canceled = true}) {
+    for (final audio in _audioLayers) {
+      audio.pauseAudio();
+    }
+    super.stop(canceled: canceled);
+  }
   bool _isDisposed = false;
   @override
   void dispose() {
@@ -158,15 +168,16 @@ class _SVGAImageState extends State<SVGAImage> {
       widget._controller.addStatusListener(_handleStatusChange);
     }
   }
-
   void _handleChange() {
-    if (mounted &&
-        !widget._controller._isDisposed &&
-        video != widget._controller.videoItem) {
-      setState(() {
-        // rebuild
-        video = widget._controller.videoItem;
-      });
+    if (mounted) {
+      if (video == widget._controller.videoItem) {
+        handleAudio();
+      } else if (!widget._controller._isDisposed) {
+        setState(() {
+          // rebuild
+          video = widget._controller.videoItem;
+        });
+      }
     }
   }
 
