@@ -6,66 +6,61 @@ import 'package:flutter/painting.dart' show decodeImageFromList;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' show get;
 import 'package:archive/archive.dart' as archive;
+// ignore: import_of_legacy_library_into_null_safe
 import 'proto/svga.pbserver.dart';
 
 const _filterKey = 'SVGAParser';
 
+/// You use SVGAParser to load and decode animation files.
 class SVGAParser {
   const SVGAParser();
   static const shared = SVGAParser();
 
+  /// Download animation file from remote server, and decode it.
   Future<MovieEntity> decodeFromURL(String url) async {
-    try {
-      final response = await get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        return decodeFromBuffer(response.bodyBytes);
-      } else {
-        throw Exception("Failed to load SVGA file from URL: $url");
-      }
-    } catch (e) {
-      log("Error decoding SVGA from URL: $e");
-      rethrow;
-    }
+    final response = await get(Uri.parse(url));
+    return decodeFromBuffer(response.bodyBytes);
   }
 
+  /// Download animation file from bundle assets, and decode it.
   Future<MovieEntity> decodeFromAssets(String path) async {
-    try {
-      final bytes = await rootBundle.load(path);
-      return decodeFromBuffer(bytes.buffer.asUint8List());
-    } catch (e) {
-      log("Error decoding SVGA from assets: $e");
-      rethrow;
-    }
+    return decodeFromBuffer((await rootBundle.load(path)).buffer.asUint8List());
   }
 
-  Future<MovieEntity> decodeFromBuffer(List<int> bytes) async {
-    if (bytes.isEmpty) throw Exception("Invalid SVGA file: Buffer is empty");
-    
+  /// Download animation file from buffer, and decode it.
+  Future<MovieEntity> decodeFromBuffer(List<int> bytes) {
     TimelineTask? timeline;
     if (!kReleaseMode) {
-      timeline = TimelineTask(filterKey: _filterKey)..start('DecodeFromBuffer', arguments: {'length': bytes.length});
+      timeline = TimelineTask(filterKey: _filterKey)
+        ..start('DecodeFromBuffer', arguments: {'length': bytes.length});
     }
-
-    try {
-      final inflatedBytes = archive.ZLibDecoder().decodeBytes(bytes);
-      final movie = MovieEntity.fromBuffer(inflatedBytes);
-      return await _prepareResources(_processShapeItems(movie), timeline: timeline);
-    } catch (e) {
-      log("Error processing SVGA file: $e");
-      rethrow;
-    } finally {
-      timeline?.finish();
+    final inflatedBytes = const archive.ZLibDecoder().decodeBytes(bytes);
+    if (timeline != null) {
+      timeline.instant('MovieEntity.fromBuffer()',
+          arguments: {'inflatedLength': inflatedBytes.length});
     }
+    final movie = MovieEntity.fromBuffer(inflatedBytes);
+    if (timeline != null) {
+      timeline.instant('prepareResources()',
+          arguments: {'images': movie.images.keys.join(',')});
+    }
+    return _prepareResources(
+      _processShapeItems(movie),
+      timeline: timeline,
+    ).whenComplete(() {
+      if (timeline != null) timeline.finish();
+    });
   }
 
   MovieEntity _processShapeItems(MovieEntity movieItem) {
     for (var sprite in movieItem.sprites) {
       List<ShapeEntity>? lastShape;
       for (var frame in sprite.frames) {
-        if (frame.shapes.isNotEmpty) {
-          if (frame.shapes.first.type == ShapeEntity_ShapeType.KEEP && lastShape != null) {
+        if (frame.shapes.isNotEmpty && frame.shapes.isNotEmpty) {
+          if (frame.shapes[0].type == ShapeEntity_ShapeType.KEEP &&
+              lastShape != null) {
             frame.shapes = lastShape;
-          } else {
+          } else if (frame.shapes.isNotEmpty == true) {
             lastShape = frame.shapes;
           }
         }
@@ -74,42 +69,68 @@ class SVGAParser {
     return movieItem;
   }
 
-  Future<MovieEntity> _prepareResources(MovieEntity movieItem, {TimelineTask? timeline}) async {
-    if (movieItem.images.isEmpty) return movieItem;
-
-    await Future.wait(movieItem.images.entries.map((entry) async {
-      final decodedImage = await _decodeImageItem(entry.key, Uint8List.fromList(entry.value), timeline: timeline);
-      if (decodedImage != null) {
-        movieItem.bitmapCache[entry.key] = decodedImage;
+  Future<MovieEntity> _prepareResources(MovieEntity movieItem,
+      {TimelineTask? timeline}) {
+    final images = movieItem.images;
+    if (images.isEmpty) return Future.value(movieItem);
+    return Future.wait(images.entries.map((item) async {
+      // result null means a decoding error occurred
+      Uint8List data = Uint8List.fromList(item.value);
+      if (isMP3Data(data)) {
+        movieItem.audiosData[item.key] = data;
+      } else {
+        final decodeImage =
+            await _decodeImageItem(item.key, data, timeline: timeline);
+        if (decodeImage != null) {
+          movieItem.bitmapCache[item.key] = decodeImage;
+        }
       }
-    }));
-    return movieItem;
+    })).then((_) => movieItem);
   }
 
-  Future<ui.Image?> _decodeImageItem(String key, Uint8List bytes, {TimelineTask? timeline}) async {
-    if (bytes.isEmpty) {
-      log("Error: Image data is empty for key: $key");
-      return null;
-    }
-
+  Future<ui.Image?> _decodeImageItem(String key, Uint8List bytes,
+      {TimelineTask? timeline}) async {
     TimelineTask? task;
     if (!kReleaseMode) {
-      task = TimelineTask(filterKey: _filterKey, parent: timeline)..start('DecodeImage', arguments: {'key': key, 'length': bytes.length});
+      task = TimelineTask(filterKey: _filterKey, parent: timeline)
+        ..start('DecodeImage', arguments: {'key': key, 'length': bytes.length});
     }
-
     try {
       final image = await decodeImageFromList(bytes);
-      task?.finish(arguments: {'imageSize': '${image.width}x${image.height}'});
+      if (task != null) {
+        task.finish(
+          arguments: {'imageSize': '${image.width}x${image.height}'},
+        );
+      }
       return image;
     } catch (e, stack) {
-      task?.finish(arguments: {'error': '$e', 'stack': '$stack'});
-      log("Error decoding image: $e");
+      if (task != null) {
+        task.finish(arguments: {'error': '$e', 'stack': '$stack'});
+      }
+      assert(() {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: e,
+          stack: stack,
+          library: 'svgaplayer',
+          context: ErrorDescription('during prepare resource'),
+          informationCollector: () sync* {
+            yield ErrorSummary('Decoding image failed.');
+          },
+        ));
+        return true;
+      }());
       return null;
     }
   }
 
   bool isMP3Data(Uint8List data) {
     const mp3MagicNumber = 'ID3';
-    return String.fromCharCodes(data.take(mp3MagicNumber.length)) == mp3MagicNumber;
+    bool result = false;
+    if (String.fromCharCodes(data.take(mp3MagicNumber.length)) ==
+        mp3MagicNumber) {
+      result = true;
+    }
+    return result;
   }
 }
+
