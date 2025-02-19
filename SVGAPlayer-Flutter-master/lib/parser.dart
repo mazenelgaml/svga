@@ -133,6 +133,7 @@ Future<ui.Image?> _decodeImageItem(String key, Uint8List bytes,
 
 
   bool isMP3Data(Uint8List data) {
+    print("sound");
     const mp3MagicNumber = 'ID3';
     bool result = false;
     if (String.fromCharCodes(data.take(mp3MagicNumber.length)) ==
