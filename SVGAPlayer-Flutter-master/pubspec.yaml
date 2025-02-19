@@ -11,7 +11,7 @@ dependencies:
     sdk: flutter
   protobuf: ^3.0.0       # تحديث إلى أحدث إصدار مستقر
   http: ^1.2.0           # تحديث http إلى أحدث إصدار متوافق
-  path_drawing: ^1.1.2   # تحديث مكتبة path_drawing
+  path_drawing: ^1.0.1   # تحديث مكتبة path_drawing
   archive: ^3.3.7        # تحديث مكتبة archive
   audioplayers: ^6.1.1   # تحديث audioplayers
   path_provider: ^2.1.5  # أحدث إصدار مستقر
