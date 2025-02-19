@@ -1,0 +1,22 @@
+name: svgaplayer_flutter
+description: The SVGAPlayer implementation of Flutter using CustomPainter.
+version: 2.2.0
+homepage: https://github.com/yyued/SVGAPlayer-Flutter
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"  # تحديث إلى أحدث إصدار من Dart
+
+dependencies:
+  flutter:
+    sdk: flutter
+  protobuf: ^3.0.0       # تحديث إلى أحدث إصدار مستقر
+  http: ^1.2.0           # تحديث http إلى أحدث إصدار متوافق
+  path_drawing: ^1.1.2   # تحديث مكتبة path_drawing
+  archive: ^3.3.7        # تحديث مكتبة archive
+  audioplayers: ^6.1.1   # تحديث audioplayers
+  path_provider: ^2.1.5  # أحدث إصدار مستقر
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1  # تحديث flutter_lints إلى الإصدار الأحدث
