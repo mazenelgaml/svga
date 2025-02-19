@@ -1,5 +1,5 @@
 library svgaplayer_flutter_player;
-import 'package:SVGAPlayer_Flutter/audio_layer.dart';
+import 'package:svgaplayer_flutter/audio_layer.dart';
 import 'dart:math';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
