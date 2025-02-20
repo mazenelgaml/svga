@@ -264,10 +264,16 @@ class soundAnimation {
   bool isPlaying() => _player.state == PlayerState.playing;
   bool isPaused() => _player.state == PlayerState.paused;
 
-  Future<void> dispose() async {
-    if (_isDisposed) return;
-    _isDisposed = true; 
-    if (isPlaying()) {stopAudio();
-    await _player.dispose();}
+ @override
+void dispose() {
+  // Stop audio layers before disposing
+  for (final audio in _audioLayers) {
+    audio.stopAudio();
   }
+  // Clear the video item and reset the controller
+  videoItem = null;
+  _isDisposed = true;
+  super.dispose();
+}
+
 }
