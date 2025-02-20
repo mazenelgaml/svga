@@ -81,6 +81,7 @@ class SVGAAnimationController extends AnimationController {
     for (final audio in _audioLayers) {
       audio.dispose();
     }
+    _audioLayers.clear();
     videoItem = null;
     super.dispose();
   }
@@ -114,12 +115,12 @@ class SoundAnimation {
   }
 
   void pauseAudio() {
-    if (_isDisposed) return;
+    if (_isDisposed || !_player.state.isPlaying) return;
     _player.pause();
   }
 
   void stopAudio() {
-    if (_isDisposed || (!isPlaying() && !isPaused())) return;
+    if (_isDisposed || (!_player.state.isPlaying && !_player.state.isPaused)) return;
     _player.stop();
   }
 
