@@ -214,53 +214,57 @@ class _SVGAImageState extends State<SVGAImage> {
   }
 }
 
-class soundAnimation {
+class SoundAnimation {
   final AudioPlayer _player = AudioPlayer();
   late final AudioEntity audioItem;
   late final MovieEntity _videoItem;
-  bool _isReady = false;
+  bool _isPlaying = false;
 
-  soundAnimation(this.audioItem, this._videoItem);
+  SoundAnimation(this.audioItem, this._videoItem);
 
   Future<void> playAudio() async {
     final audioData = _videoItem.audiosData[audioItem.audioKey];
     if (audioData != null) {
-      final cacheDir = await getApplicationCacheDirectory();
-      final cacheFile = File('${cacheDir.path}/temp_${audioItem.audioKey}.mp3');
-      if (!cacheFile.existsSync()) {
-        await cacheFile.writeAsBytes(audioData);
-      }
       try {
-        if (!_isReady) {
-          _isReady = true;
+        final cacheDir = await getApplicationCacheDirectory();
+        final cacheFile = File('${cacheDir.path}/temp_${audioItem.audioKey}.mp3');
+
+        if (!await cacheFile.exists()) {
+          await cacheFile.writeAsBytes(audioData);
+        }
+
+        if (!_isPlaying) {
+          _isPlaying = true;
           await _player.play(DeviceFileSource(cacheFile.path));
-          _isReady = false;
+          _player.onPlayerComplete.listen((_) {
+            _isPlaying = false;
+          });
         }
       } catch (e) {
-      developer.log('Failed to play audio: $e');
+        debugPrint('Failed to play audio: $e');
       }
     }
   }
 
-  void pauseAudio() => _player.pause();
-  void resumeAudio() => _player.resume();
-  void stopAudio() {
-    if (isPlaying() || isPaused()) _player.stop();
+  Future<void> pauseAudio() async => await _player.pause();
+  Future<void> resumeAudio() async => await _player.resume();
+  
+  Future<void> stopAudio() async {
+    if (isPlaying() || isPaused()) {
+      await _player.stop();
+      _isPlaying = false;
+    }
   }
 
-  void setVolume(double volume) {
-    _player.setVolume(volume);
-  }
-  
-  void muteAudio(bool mute) {
-  _player.setVolume(mute ? 0 : 1);
-}
+  void setVolume(double volume) => _player.setVolume(volume);
+
+  void muteAudio(bool mute) => _player.setVolume(mute ? 0 : 1);
 
   bool isPlaying() => _player.state == PlayerState.playing;
   bool isPaused() => _player.state == PlayerState.paused;
 
   Future<void> dispose() async {
-    if (isPlaying()) stopAudio();
+    await stopAudio();
     await _player.dispose();
   }
 }
