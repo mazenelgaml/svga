@@ -219,10 +219,12 @@ class soundAnimation {
   late final AudioEntity audioItem;
   late final MovieEntity _videoItem;
   bool _isReady = false;
+  bool _isDisposed = false;
 
   soundAnimation(this.audioItem, this._videoItem);
 
   Future<void> playAudio() async {
+     if (_isDisposed || isPlaying()) return;
     final audioData = _videoItem.audiosData[audioItem.audioKey];
     if (audioData != null) {
       final cacheDir = await getApplicationCacheDirectory();
@@ -237,7 +239,7 @@ class soundAnimation {
           _isReady = false;
         }
       } catch (e) {
-      developer.log('Failed to play audio: $e');
+       debugPrint('Failed to play audio: $e'); 
       }
     }
   }
@@ -245,14 +247,17 @@ class soundAnimation {
   void pauseAudio() => _player.pause();
   void resumeAudio() => _player.resume();
   void stopAudio() {
-    if (isPlaying() || isPaused()) _player.stop();
+     if (_isDisposed || (!isPlaying() && !isPaused())) return;
+    _player.stop();
   }
 
   void setVolume(double volume) {
+     if (_isDisposed) return;
     _player.setVolume(volume);
   }
   
   void muteAudio(bool mute) {
+     if (_isDisposed) return;
   _player.setVolume(mute ? 0 : 1);
 }
 
@@ -260,6 +265,8 @@ class soundAnimation {
   bool isPaused() => _player.state == PlayerState.paused;
 
   Future<void> dispose() async {
+    if (_isDisposed) return;
+    _isDisposed = true;
     if (isPlaying()) stopAudio();
     await _player.dispose();
   }
