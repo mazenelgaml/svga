@@ -212,7 +212,6 @@ class _SVGAImageState extends State<SVGAImage> {
   }
 }
 
-// دمج كود audio_layer هنا
 class SVGAAudioLayer {
   final AudioPlayer _player = AudioPlayer();
   late final AudioEntity audioItem;
@@ -241,17 +240,21 @@ class SVGAAudioLayer {
     }
   }
 
-  pauseAudio() => _player.pause();
-  resumeAudio() => _player.resume();
-  stopAudio() {
+  void pauseAudio() => _player.pause();
+  void resumeAudio() => _player.resume();
+  void stopAudio() {
     if (isPlaying() || isPaused()) _player.stop();
   }
 
-  isPlaying() => _player.state == PlayerState.playing;
-  isPaused() => _player.state == PlayerState.paused;
+  void setVolume(double volume) {
+    _player.setVolume(volume);
+  }
 
-  Future<void> dispose() {
+  bool isPlaying() => _player.state == PlayerState.playing;
+  bool isPaused() => _player.state == PlayerState.paused;
+
+  Future<void> dispose() async {
     if (isPlaying()) stopAudio();
-    return _player.dispose();
+    await _player.dispose();
   }
 }
