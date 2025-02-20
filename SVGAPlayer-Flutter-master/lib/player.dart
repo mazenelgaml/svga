@@ -48,6 +48,7 @@ class SVGAAnimationController extends AnimationController {
   final List<SVGAAudioLayer> _audioLayers = [];
   bool _canvasNeedsClear = false;
 
+ List<SVGAAudioLayer> get audioLayers => _audioLayers;
   SVGAAnimationController({required super.vsync}) : super(duration: Duration.zero);
 
   set videoItem(MovieEntity? value) {
