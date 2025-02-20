@@ -1,4 +1,4 @@
-soundAnimation//  Generated code. Do not modify.
+
 //  source: svga.proto
 //
 // @dart = '3.6.1'
