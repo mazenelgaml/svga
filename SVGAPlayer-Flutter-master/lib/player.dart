@@ -221,32 +221,42 @@ class soundAnimation {
   bool _isReady = false;
   bool _isDisposed = false;
 
-  // تعريف audio layers إذا كنت تحتاجها
+  // تعريف _audioLayers لمنع الأخطاء
   List<soundAnimation> _audioLayers = [];
 
-  // تعريف videoItem حتى لا يظهر الخطأ
+  // تعريف videoItem لمنع الأخطاء
   MovieEntity? videoItem;
 
   soundAnimation(this.audioItem, this._videoItem);
 
   Future<void> playAudio() async {
     if (_isDisposed || isPlaying()) return;
+
     final audioData = _videoItem.audiosData[audioItem.audioKey];
-    if (audioData != null) {
-      final cacheDir = await getApplicationCacheDirectory();
-      final cacheFile = File('${cacheDir.path}/temp_${audioItem.audioKey}.mp3');
-      if (!cacheFile.existsSync()) {
-        await cacheFile.writeAsBytes(audioData);
+    if (audioData == null) {
+      debugPrint('❌ Audio data is null for key: ${audioItem.audioKey}');
+      return;
+    }
+
+    final cacheDir = await getApplicationCacheDirectory();
+    final cacheFile = File('${cacheDir.path}/temp_${audioItem.audioKey}.mp3');
+
+    if (!cacheFile.existsSync()) {
+      await cacheFile.writeAsBytes(audioData);
+      debugPrint('✅ Audio file created: ${cacheFile.path}');
+    } else {
+      debugPrint('🔍 Audio file already exists: ${cacheFile.path}');
+    }
+
+    try {
+      if (!_isReady) {
+        _isReady = true;
+        await _player.play(DeviceFileSource(cacheFile.path));
+        debugPrint('🔊 Playing audio from: ${cacheFile.path}');
+        _isReady = false;
       }
-      try {
-        if (!_isReady) {
-          _isReady = true;
-          await _player.play(DeviceFileSource(cacheFile.path));
-          _isReady = false;
-        }
-      } catch (e) {
-        debugPrint('Failed to play audio: $e');
-      }
+    } catch (e) {
+      debugPrint('❌ Failed to play audio: $e');
     }
   }
 
@@ -274,18 +284,12 @@ class soundAnimation {
   void dispose() {
     if (_isDisposed) return;
 
-    // إيقاف جميع الأصوات في _audioLayers إذا كنت تحتاجه
     for (final audio in _audioLayers) {
       audio.stopAudio();
     }
 
-    // إلغاء الفيديو
     videoItem = null;
-
-    // إيقاف الصوت والتأكد من التخلص منه
     _player.dispose();
-
-    // تحديث حالة التخلص
     _isDisposed = true;
   }
 }
