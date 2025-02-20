@@ -9,7 +9,7 @@ import 'dart:core' as $core;
 import 'dart:core' show int, bool, double, String, List, Map, override;
 import 'dart:ui' as ui show Image, Path;
 import 'package:protobuf/protobuf.dart' as $pb;
-
+import 'dart:typed_data';
 import 'svga.pbenum.dart';
 
 export 'svga.pbenum.dart';
@@ -1651,10 +1651,7 @@ class FrameEntity extends $pb.GeneratedMessage {
 
 class MovieEntity extends $pb.GeneratedMessage {
   
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      const $core.bool.fromEnvironment('protobuf.omit_message_names')
-          ? ''
-          : 'MovieEntity',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'MovieEntity',
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
@@ -1666,28 +1663,20 @@ class MovieEntity extends $pb.GeneratedMessage {
             ? ''
             : 'version')
     ..aOM<MovieParams>(
-        2,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'params',
+        2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'params',
         subBuilder: MovieParams.create)
     ..m<$core.String, $core.List<$core.int>>(
-        3,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'images',
+        3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'images',
         entryClassName: 'MovieEntity.ImagesEntry',
         keyFieldType: $pb.PbFieldType.OS,
         valueFieldType: $pb.PbFieldType.OY,
         packageName: const $pb.PackageName('com.opensource.svga'))
     ..pc<SpriteEntity>(
         4,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'sprites',
+        const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sprites',
         $pb.PbFieldType.PM,
         subBuilder: SpriteEntity.create)
-    ..pc<AudioEntity>(
+     ..pc<AudioEntity>(
         5,
         const $core.bool.fromEnvironment('protobuf.omit_field_names')
             ? ''
@@ -1787,7 +1776,7 @@ class MovieEntity extends $pb.GeneratedMessage {
   SVGADynamicEntity dynamicItem = SVGADynamicEntity();
   Map<String, ui.Image> bitmapCache = {};
   Map<String, ui.Path> pathCache = {};
-  Map<String, Uint8List> audiosData = {};
+   Map<String, Uint8List> audiosData = {};
 
   void dispose() {
     bitmapCache.values.forEach((element) {
@@ -1798,4 +1787,3 @@ class MovieEntity extends $pb.GeneratedMessage {
     audiosData.clear();
   }
 }
-
