@@ -221,10 +221,16 @@ class soundAnimation {
   bool _isReady = false;
   bool _isDisposed = false;
 
+  // تعريف audio layers إذا كنت تحتاجها
+  List<soundAnimation> _audioLayers = [];
+
+  // تعريف videoItem حتى لا يظهر الخطأ
+  MovieEntity? videoItem;
+
   soundAnimation(this.audioItem, this._videoItem);
 
   Future<void> playAudio() async {
-     if (_isDisposed || isPlaying()) return;
+    if (_isDisposed || isPlaying()) return;
     final audioData = _videoItem.audiosData[audioItem.audioKey];
     if (audioData != null) {
       final cacheDir = await getApplicationCacheDirectory();
@@ -239,49 +245,47 @@ class soundAnimation {
           _isReady = false;
         }
       } catch (e) {
-       debugPrint('Failed to play audio: $e'); 
+        debugPrint('Failed to play audio: $e');
       }
     }
   }
 
   void pauseAudio() => _player.pause();
   void resumeAudio() => _player.resume();
+
   void stopAudio() {
-     if (_isDisposed || (!isPlaying() && !isPaused())) return;
+    if (_isDisposed || (!isPlaying() && !isPaused())) return;
     _player.stop();
   }
 
   void setVolume(double volume) {
-     if (_isDisposed) return;
+    if (_isDisposed) return;
     _player.setVolume(volume);
   }
-  
+
   void muteAudio(bool mute) {
-     if (_isDisposed) return;
-  _player.setVolume(mute ? 0 : 1);
-}
+    if (_isDisposed) return;
+    _player.setVolume(mute ? 0 : 1);
+  }
 
   bool isPlaying() => _player.state == PlayerState.playing;
   bool isPaused() => _player.state == PlayerState.paused;
 
- @override
-void dispose() {
-  if (_isDisposed) return;
-  
-  // إيقاف كل الأصوات في _audioLayers (إذا كنت تستخدمها)
-  for (final audio in _audioLayers) {
-    audio.stopAudio();
+  void dispose() {
+    if (_isDisposed) return;
+
+    // إيقاف جميع الأصوات في _audioLayers إذا كنت تحتاجه
+    for (final audio in _audioLayers) {
+      audio.stopAudio();
+    }
+
+    // إلغاء الفيديو
+    videoItem = null;
+
+    // إيقاف الصوت والتأكد من التخلص منه
+    _player.dispose();
+
+    // تحديث حالة التخلص
+    _isDisposed = true;
   }
-
-  // حذف الفيديو إذا كان معرفًا
-  videoItem = null;
-
-  // التخلص من مشغل الصوت
-  _player.dispose();
-
-  // تحديث الحالة
-  _isDisposed = true;
-}
-
-
 }
