@@ -213,96 +213,61 @@ class _SVGAImageState extends State<SVGAImage> {
     );
   }
 }
-class SoundAnimation {
+
+class soundAnimation {
   final AudioPlayer _player = AudioPlayer();
   late final AudioEntity audioItem;
   late final MovieEntity _videoItem;
   bool _isReady = false;
   bool _isDisposed = false;
 
-  SoundAnimation(this.audioItem, this._videoItem);
+  soundAnimation(this.audioItem, this._videoItem);
 
   Future<void> playAudio() async {
-    if (_isDisposed) return;
-
+     if (_isDisposed || isPlaying()) return;
     final audioData = _videoItem.audiosData[audioItem.audioKey];
     if (audioData != null) {
       final cacheDir = await getApplicationCacheDirectory();
       final cacheFile = File('${cacheDir.path}/temp_${audioItem.audioKey}.mp3');
-
       if (!cacheFile.existsSync()) {
         await cacheFile.writeAsBytes(audioData);
       }
-
       try {
-        if (!_isReady && !_isDisposed) {
+        if (!_isReady) {
           _isReady = true;
           await _player.play(DeviceFileSource(cacheFile.path));
           _isReady = false;
         }
       } catch (e) {
-        debugPrint('⚠️ Failed to play audio: $e');
+       debugPrint('Failed to play audio: $e'); 
       }
     }
   }
 
-  void pauseAudio() {
-    if (_isDisposed) return;
-    try {
-      _player.pause();
-    } catch (e) {
-      debugPrint('⚠️ Failed to pause audio: $e');
-    }
-  }
-
-  void resumeAudio() {
-    if (_isDisposed) return;
-    try {
-      _player.resume();
-    } catch (e) {
-      debugPrint('⚠️ Failed to resume audio: $e');
-    }
-  }
-
+  void pauseAudio() => _player.pause();
+  void resumeAudio() => _player.resume();
   void stopAudio() {
-    if (_isDisposed || (!isPlaying() && !isPaused())) return;
-    try {
-      _player.stop();
-    } catch (e) {
-      debugPrint('⚠️ Failed to stop audio: $e');
-    }
+     if (_isDisposed || (!isPlaying() && !isPaused())) return;
+    _player.stop();
   }
 
   void setVolume(double volume) {
-    if (_isDisposed) return;
-    try {
-      _player.setVolume(volume);
-    } catch (e) {
-      debugPrint('⚠️ Failed to set volume: $e');
-    }
+     if (_isDisposed) return;
+    _player.setVolume(volume);
   }
-
+  
   void muteAudio(bool mute) {
-    if (_isDisposed) return;
-    try {
-      _player.setVolume(mute ? 0 : 1);
-    } catch (e) {
-      debugPrint('⚠️ Failed to mute audio: $e');
-    }
-  }
+     if (_isDisposed) return;
+  _player.setVolume(mute ? 0 : 1);
+}
 
-  bool isPlaying() => !_isDisposed && _player.state == PlayerState.playing;
-  bool isPaused() => !_isDisposed && _player.state == PlayerState.paused;
+  bool isPlaying() => _player.state == PlayerState.playing;
+  bool isPaused() => _player.state == PlayerState.paused;
 
   Future<void> dispose() async {
     if (_isDisposed) return;
-    _isDisposed = true;
-
-    try {
-      if (isPlaying()) await _player.stop();
-      await _player.dispose();
-    } catch (e) {
-      debugPrint('⚠️ Failed to dispose AudioPlayer: $e');
-    }
+    _isDisposed = true; //
+    if (isPlaying()) stopAudio();
+    await _player.dispose();
   }
 }
