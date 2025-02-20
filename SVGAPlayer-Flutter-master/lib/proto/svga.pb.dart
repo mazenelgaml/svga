@@ -10,6 +10,7 @@ import 'dart:core' show int, bool, double, String, List, Map, override;
 import 'dart:ui' as ui show Image, Path;
 import 'package:protobuf/protobuf.dart' as $pb;
 import 'dart:typed_data';
+import '../player.dart';
 import 'svga.pbenum.dart';
 export 'svga.pbenum.dart';
 import '../dynamic_entity.dart';

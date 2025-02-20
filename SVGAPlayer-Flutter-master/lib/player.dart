@@ -266,15 +266,22 @@ class soundAnimation {
 
  @override
 void dispose() {
-  // Stop audio layers before disposing
+  if (_isDisposed) return;
+  
+  // إيقاف كل الأصوات في _audioLayers (إذا كنت تستخدمها)
   for (final audio in _audioLayers) {
     audio.stopAudio();
   }
-  // Clear the video item and reset the controller
+
+  // حذف الفيديو إذا كان معرفًا
   videoItem = null;
+
+  // التخلص من مشغل الصوت
+  _player.dispose();
+
+  // تحديث الحالة
   _isDisposed = true;
-  audio.dispose();
-  super.dispose();
 }
+
 
 }
