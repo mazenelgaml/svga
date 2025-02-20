@@ -220,76 +220,60 @@ class soundAnimation {
   late final MovieEntity _videoItem;
   bool _isReady = false;
   bool _isDisposed = false;
-
-  // تعريف _audioLayers لمنع الأخطاء
-  List<soundAnimation> _audioLayers = [];
-
-  // تعريف videoItem لمنع الأخطاء
-  MovieEntity? videoItem;
-
+List<soundAnimation> _audioLayers = [];
   soundAnimation(this.audioItem, this._videoItem);
 
   Future<void> playAudio() async {
-    if (_isDisposed || isPlaying()) return;
-
+     if (_isDisposed || isPlaying()) return;
     final audioData = _videoItem.audiosData[audioItem.audioKey];
-    if (audioData == null) {
-      debugPrint('❌ Audio data is null for key: ${audioItem.audioKey}');
-      return;
-    }
-
-    final cacheDir = await getApplicationCacheDirectory();
-    final cacheFile = File('${cacheDir.path}/temp_${audioItem.audioKey}.mp3');
-
-    if (!cacheFile.existsSync()) {
-      await cacheFile.writeAsBytes(audioData);
-      debugPrint('✅ Audio file created: ${cacheFile.path}');
-    } else {
-      debugPrint('🔍 Audio file already exists: ${cacheFile.path}');
-    }
-
-    try {
-      if (!_isReady) {
-        _isReady = true;
-        await _player.play(DeviceFileSource(cacheFile.path));
-        debugPrint('🔊 Playing audio from: ${cacheFile.path}');
-        _isReady = false;
+    if (audioData != null) {
+      final cacheDir = await getApplicationCacheDirectory();
+      final cacheFile = File('${cacheDir.path}/temp_${audioItem.audioKey}.mp3');
+      if (!cacheFile.existsSync()) {
+        await cacheFile.writeAsBytes(audioData);
       }
-    } catch (e) {
-      debugPrint('❌ Failed to play audio: $e');
+      try {
+        if (!_isReady) {
+          _isReady = true;
+          await _player.play(DeviceFileSource(cacheFile.path));
+          _isReady = false;
+        }
+      } catch (e) {
+       debugPrint('Failed to play audio: $e'); 
+      }
     }
   }
 
   void pauseAudio() => _player.pause();
   void resumeAudio() => _player.resume();
-
   void stopAudio() {
-    if (_isDisposed || (!isPlaying() && !isPaused())) return;
+     if (_isDisposed || (!isPlaying() && !isPaused())) return;
     _player.stop();
   }
 
   void setVolume(double volume) {
-    if (_isDisposed) return;
+     if (_isDisposed) return;
     _player.setVolume(volume);
   }
-
+  
   void muteAudio(bool mute) {
-    if (_isDisposed) return;
-    _player.setVolume(mute ? 0 : 1);
-  }
+     if (_isDisposed) return;
+  _player.setVolume(mute ? 0 : 1);
+}
 
   bool isPlaying() => _player.state == PlayerState.playing;
   bool isPaused() => _player.state == PlayerState.paused;
 
-  void dispose() {
-    if (_isDisposed) return;
-
-    for (final audio in _audioLayers) {
-      audio.stopAudio();
-    }
-
-    videoItem = null;
-    _player.dispose();
-    _isDisposed = true;
+ @override
+void dispose() {
+  // Stop audio layers before disposing
+  for (final audio in _audioLayers) {
+    audio.stopAudio();
   }
+  // Clear the video item and reset the controller
+  videoItem = null;
+  _isDisposed = true;
+  super.dispose();
+}
+
 }
