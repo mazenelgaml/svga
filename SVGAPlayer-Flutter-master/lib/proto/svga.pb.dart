@@ -11,7 +11,6 @@ import 'dart:ui' as ui show Image, Path;
 import 'package:protobuf/protobuf.dart' as $pb;
 import 'dart:typed_data';
 import 'svga.pbenum.dart';
-
 export 'svga.pbenum.dart';
 import '../dynamic_entity.dart';
 

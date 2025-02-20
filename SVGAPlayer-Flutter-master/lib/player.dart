@@ -273,6 +273,7 @@ void dispose() {
   // Clear the video item and reset the controller
   videoItem = null;
   _isDisposed = true;
+  audio.dispose();
   super.dispose();
 }
 
