@@ -1769,6 +1769,7 @@ class MovieEntity extends $pb.GeneratedMessage {
   SVGADynamicEntity dynamicItem = SVGADynamicEntity();
   Map<String, ui.Image> bitmapCache = {};
   Map<String, ui.Path> pathCache = {};
+   Map<String, Uint8List> audiosData = {};
 
   void dispose() {
     bitmapCache.values.forEach((element) {
@@ -1776,5 +1777,6 @@ class MovieEntity extends $pb.GeneratedMessage {
     });
     bitmapCache.clear();
     pathCache.clear();
+    audiosData.clear();
   }
 }
