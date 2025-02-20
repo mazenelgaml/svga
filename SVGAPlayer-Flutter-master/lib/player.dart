@@ -221,11 +221,11 @@ class soundAnimation {
   bool _isReady = false;
   bool _isDisposed = false;
 List<soundAnimation> _audioLayers = [];
-  soundAnimation(this.audioItem, this._videoItem);
+  soundAnimation(this.audioItem, this.videoItem);
 
   Future<void> playAudio() async {
      if (_isDisposed || isPlaying()) return;
-    final audioData = _videoItem.audiosData[audioItem.audioKey];
+    final audioData = videoItem.audiosData[audioItem.audioKey];
     if (audioData != null) {
       final cacheDir = await getApplicationCacheDirectory();
       final cacheFile = File('${cacheDir.path}/temp_${audioItem.audioKey}.mp3');
