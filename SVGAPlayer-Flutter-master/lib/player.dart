@@ -264,10 +264,15 @@ class soundAnimation {
     }
   }
 
-  void pauseAudio() => _player.pause();
-  void resumeAudio() => _player.resume();
+  void pauseAudio() {
+    if (_isDisposed) return;
+    _player.pause();}
+  void resumeAudio(){ 
+    if (_isDisposed) return;
+    _player.resume();}
 
   void stopAudio() {
+    
     if (_isDisposed || (!isPlaying() && !isPaused())) return;
     _player.stop();
   }
