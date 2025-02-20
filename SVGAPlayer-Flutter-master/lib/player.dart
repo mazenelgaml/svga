@@ -285,15 +285,27 @@ class soundAnimation {
   bool isPlaying() => _player.state == PlayerState.playing;
   bool isPaused() => _player.state == PlayerState.paused;
 
-  void dispose() {
-    if (_isDisposed) return;
+void dispose() {
+  if (_isDisposed) return;
 
-    for (final audio in _audioLayers) {
-      audio.stopAudio();
-    }
-
-    videoItem = null;
-    _player.dispose();
-    _isDisposed = true;
+  // التأكد من إيقاف جميع الأصوات قبل التخلص
+  for (final audio in _audioLayers) {
+    audio.stopAudio();
   }
+
+  // إلغاء مرجع الفيديو
+  videoItem = null;
+
+  // التأكد من أن _player لم يتم التخلص منه مسبقًا قبل استدعاء dispose
+  try {
+    if (_player.state != PlayerState.disposed) {
+      _player.dispose();
+    }
+  } catch (e) {
+    debugPrint('Error while disposing AudioPlayer: $e');
+  }
+
+  _isDisposed = true;
+}
+
 }
