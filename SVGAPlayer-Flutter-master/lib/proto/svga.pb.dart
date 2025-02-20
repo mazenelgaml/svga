@@ -1,14 +1,15 @@
-
+///
+//  Generated code. Do not modify.
 //  source: svga.proto
 //
-// @dart = '3.6.1'
+// @dart = 2.12
 // ignore_for_file: annotate_overrides,camel_case_types,unnecessary_const,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type,unnecessary_this,prefer_final_fields
 
 import 'dart:core' as $core;
 import 'dart:core' show int, bool, double, String, List, Map, override;
 import 'dart:ui' as ui show Image, Path;
 import 'package:protobuf/protobuf.dart' as $pb;
-import 'dart:typed_data';
+
 import 'svga.pbenum.dart';
 
 export 'svga.pbenum.dart';
@@ -25,31 +26,15 @@ class MovieParams extends $pb.GeneratedMessage {
               : 'com.opensource.svga'),
       createEmptyInstance: create)
     ..a<$core.double>(
-        1,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'viewBoxWidth',
-        $pb.PbFieldType.OF,
+        1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'viewBoxWidth', $pb.PbFieldType.OF,
         protoName: 'viewBoxWidth')
     ..a<$core.double>(
         2,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'viewBoxHeight',
+        const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'viewBoxHeight',
         $pb.PbFieldType.OF,
         protoName: 'viewBoxHeight')
-    ..a<$core.int>(
-        3,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'fps',
-        $pb.PbFieldType.O3)
-    ..a<$core.int>(
-        4,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'frames',
-        $pb.PbFieldType.O3)
+    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fps', $pb.PbFieldType.O3)
+    ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'frames', $pb.PbFieldType.O3)
     ..hasRequiredFields = false;
 
   MovieParams._() : super();
@@ -159,11 +144,7 @@ class SpriteEntity extends $pb.GeneratedMessage {
               ? ''
               : 'com.opensource.svga'),
       createEmptyInstance: create)
-    ..aOS(
-        1,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'imageKey',
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'imageKey',
         protoName: 'imageKey')
     ..pc<FrameEntity>(
         2,
@@ -172,12 +153,7 @@ class SpriteEntity extends $pb.GeneratedMessage {
             : 'frames',
         $pb.PbFieldType.PM,
         subBuilder: FrameEntity.create)
-    ..aOS(
-        3,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'matteKey',
-        protoName: 'matteKey')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'matteKey', protoName: 'matteKey')
     ..hasRequiredFields = false;
 
   SpriteEntity._() : super();
@@ -263,40 +239,16 @@ class AudioEntity extends $pb.GeneratedMessage {
               ? ''
               : 'com.opensource.svga'),
       createEmptyInstance: create)
-    ..aOS(
-        1,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'audioKey',
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'audioKey',
         protoName: 'audioKey')
     ..a<$core.int>(
-        2,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'startFrame',
-        $pb.PbFieldType.O3,
+        2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startFrame', $pb.PbFieldType.O3,
         protoName: 'startFrame')
     ..a<$core.int>(
-        3,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'endFrame',
-        $pb.PbFieldType.O3,
+        3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'endFrame', $pb.PbFieldType.O3,
         protoName: 'endFrame')
-    ..a<$core.int>(
-        4,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'startTime',
-        $pb.PbFieldType.O3,
-        protoName: 'startTime')
-    ..a<$core.int>(
-        5,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'totalTime',
-        $pb.PbFieldType.O3,
-        protoName: 'totalTime')
+    ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startTime', $pb.PbFieldType.O3, protoName: 'startTime')
+    ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'totalTime', $pb.PbFieldType.O3, protoName: 'totalTime')
     ..hasRequiredFields = false;
 
   AudioEntity._() : super();
@@ -436,16 +388,9 @@ class Layout extends $pb.GeneratedMessage {
         $pb.PbFieldType.OF)
     ..a<$core.double>(
         3,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'width',
+        const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'width',
         $pb.PbFieldType.OF)
-    ..a<$core.double>(
-        4,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'height',
-        $pb.PbFieldType.OF)
+    ..a<$core.double>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'height', $pb.PbFieldType.OF)
     ..hasRequiredFields = false;
 
   Layout._() : super();
@@ -569,28 +514,11 @@ class Transform extends $pb.GeneratedMessage {
         $pb.PbFieldType.OF)
     ..a<$core.double>(
         3,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'c',
+        const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'c',
         $pb.PbFieldType.OF)
-    ..a<$core.double>(
-        4,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'd',
-        $pb.PbFieldType.OF)
-    ..a<$core.double>(
-        5,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'tx',
-        $pb.PbFieldType.OF)
-    ..a<$core.double>(
-        6,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'ty',
-        $pb.PbFieldType.OF)
+    ..a<$core.double>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'd', $pb.PbFieldType.OF)
+    ..a<$core.double>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'tx', $pb.PbFieldType.OF)
+    ..a<$core.double>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ty', $pb.PbFieldType.OF)
     ..hasRequiredFields = false;
 
   Transform._() : super();
@@ -815,23 +743,10 @@ class ShapeEntity_RectArgs extends $pb.GeneratedMessage {
         $pb.PbFieldType.OF)
     ..a<$core.double>(
         3,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'width',
+        const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'width',
         $pb.PbFieldType.OF)
-    ..a<$core.double>(
-        4,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'height',
-        $pb.PbFieldType.OF)
-    ..a<$core.double>(
-        5,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'cornerRadius',
-        $pb.PbFieldType.OF,
-        protoName: 'cornerRadius')
+    ..a<$core.double>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'height', $pb.PbFieldType.OF)
+    ..a<$core.double>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'cornerRadius', $pb.PbFieldType.OF, protoName: 'cornerRadius')
     ..hasRequiredFields = false;
 
   ShapeEntity_RectArgs._() : super();
@@ -972,19 +887,9 @@ class ShapeEntity_EllipseArgs extends $pb.GeneratedMessage {
             : 'y',
         $pb.PbFieldType.OF)
     ..a<$core.double>(
-        3,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'radiusX',
-        $pb.PbFieldType.OF,
+        3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'radiusX', $pb.PbFieldType.OF,
         protoName: 'radiusX')
-    ..a<$core.double>(
-        4,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'radiusY',
-        $pb.PbFieldType.OF,
-        protoName: 'radiusY')
+    ..a<$core.double>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'radiusY', $pb.PbFieldType.OF, protoName: 'radiusY')
     ..hasRequiredFields = false;
 
   ShapeEntity_EllipseArgs._() : super();
@@ -1111,16 +1016,9 @@ class ShapeEntity_ShapeStyle_RGBAColor extends $pb.GeneratedMessage {
         $pb.PbFieldType.OF)
     ..a<$core.double>(
         3,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'b',
+        const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'b',
         $pb.PbFieldType.OF)
-    ..a<$core.double>(
-        4,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'a',
-        $pb.PbFieldType.OF)
+    ..a<$core.double>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'a', $pb.PbFieldType.OF)
     ..hasRequiredFields = false;
 
   ShapeEntity_ShapeStyle_RGBAColor._() : super();
@@ -1227,82 +1125,33 @@ class ShapeEntity_ShapeStyle_RGBAColor extends $pb.GeneratedMessage {
 }
 
 class ShapeEntity_ShapeStyle extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      const $core.bool.fromEnvironment('protobuf.omit_message_names')
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ShapeEntity.ShapeStyle',
+      package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names')
           ? ''
-          : 'ShapeEntity.ShapeStyle',
-      package: const $pb.PackageName(
-          const $core.bool.fromEnvironment('protobuf.omit_message_names')
-              ? ''
-              : 'com.opensource.svga'),
+          : 'com.opensource.svga'),
       createEmptyInstance: create)
     ..aOM<ShapeEntity_ShapeStyle_RGBAColor>(
-        1,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'fill',
+        1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fill',
         subBuilder: ShapeEntity_ShapeStyle_RGBAColor.create)
     ..aOM<ShapeEntity_ShapeStyle_RGBAColor>(
-        2,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'stroke',
+        2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'stroke',
         subBuilder: ShapeEntity_ShapeStyle_RGBAColor.create)
-    ..a<$core.double>(
-        3,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'strokeWidth',
-        $pb.PbFieldType.OF,
+    ..a<$core.double>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'strokeWidth', $pb.PbFieldType.OF,
         protoName: 'strokeWidth')
-    ..e<ShapeEntity_ShapeStyle_LineCap>(
-        4,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'lineCap',
-        $pb.PbFieldType.OE,
+    ..e<ShapeEntity_ShapeStyle_LineCap>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lineCap', $pb.PbFieldType.OE,
         protoName: 'lineCap',
         defaultOrMaker: ShapeEntity_ShapeStyle_LineCap.LineCap_BUTT,
         valueOf: ShapeEntity_ShapeStyle_LineCap.valueOf,
         enumValues: ShapeEntity_ShapeStyle_LineCap.values)
-    ..e<ShapeEntity_ShapeStyle_LineJoin>(
-        5,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'lineJoin',
-        $pb.PbFieldType.OE,
+    ..e<ShapeEntity_ShapeStyle_LineJoin>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lineJoin', $pb.PbFieldType.OE,
         protoName: 'lineJoin',
         defaultOrMaker: ShapeEntity_ShapeStyle_LineJoin.LineJoin_MITER,
         valueOf: ShapeEntity_ShapeStyle_LineJoin.valueOf,
         enumValues: ShapeEntity_ShapeStyle_LineJoin.values)
-    ..a<$core.double>(
-        6,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'miterLimit',
-        $pb.PbFieldType.OF,
-        protoName: 'miterLimit')
-    ..a<$core.double>(
-        7,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'lineDashI',
-        $pb.PbFieldType.OF,
-        protoName: 'lineDashI')
-    ..a<$core.double>(
-        8,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'lineDashII',
-        $pb.PbFieldType.OF,
-        protoName: 'lineDashII')
-    ..a<$core.double>(
-        9,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'lineDashIII',
-        $pb.PbFieldType.OF,
-        protoName: 'lineDashIII')
+    ..a<$core.double>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'miterLimit', $pb.PbFieldType.OF, protoName: 'miterLimit')
+    ..a<$core.double>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lineDashI', $pb.PbFieldType.OF, protoName: 'lineDashI')
+    ..a<$core.double>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lineDashII', $pb.PbFieldType.OF, protoName: 'lineDashII')
+    ..a<$core.double>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lineDashIII', $pb.PbFieldType.OF, protoName: 'lineDashIII')
     ..hasRequiredFields = false;
 
   ShapeEntity_ShapeStyle._() : super();
@@ -1498,55 +1347,28 @@ class ShapeEntity extends $pb.GeneratedMessage {
     4: ShapeEntity_Args.ellipse,
     0: ShapeEntity_Args.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      const $core.bool.fromEnvironment('protobuf.omit_message_names')
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ShapeEntity',
+      package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names')
           ? ''
-          : 'ShapeEntity',
-      package: const $pb.PackageName(
-          const $core.bool.fromEnvironment('protobuf.omit_message_names')
-              ? ''
-              : 'com.opensource.svga'),
+          : 'com.opensource.svga'),
       createEmptyInstance: create)
     ..oo(0, [2, 3, 4])
     ..e<ShapeEntity_ShapeType>(
-        1,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'type',
-        $pb.PbFieldType.OE,
+        1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type', $pb.PbFieldType.OE,
         defaultOrMaker: ShapeEntity_ShapeType.SHAPE,
         valueOf: ShapeEntity_ShapeType.valueOf,
         enumValues: ShapeEntity_ShapeType.values)
     ..aOM<ShapeEntity_ShapeArgs>(
-        2,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'shape',
+        2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'shape',
         subBuilder: ShapeEntity_ShapeArgs.create)
     ..aOM<ShapeEntity_RectArgs>(
-        3,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'rect',
+        3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rect',
         subBuilder: ShapeEntity_RectArgs.create)
     ..aOM<ShapeEntity_EllipseArgs>(
-        4,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'ellipse',
+        4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ellipse',
         subBuilder: ShapeEntity_EllipseArgs.create)
-    ..aOM<ShapeEntity_ShapeStyle>(
-        10,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'styles',
-        subBuilder: ShapeEntity_ShapeStyle.create)
-    ..aOM<Transform>(
-        11,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'transform',
-        subBuilder: Transform.create)
+    ..aOM<ShapeEntity_ShapeStyle>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'styles', subBuilder: ShapeEntity_ShapeStyle.create)
+    ..aOM<Transform>(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'transform', subBuilder: Transform.create)
     ..hasRequiredFields = false;
 
   ShapeEntity._() : super();
@@ -1692,10 +1514,7 @@ class ShapeEntity extends $pb.GeneratedMessage {
 }
 
 class FrameEntity extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      const $core.bool.fromEnvironment('protobuf.omit_message_names')
-          ? ''
-          : 'FrameEntity',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FrameEntity',
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
@@ -1707,30 +1526,15 @@ class FrameEntity extends $pb.GeneratedMessage {
             ? ''
             : 'alpha',
         $pb.PbFieldType.OF)
-    ..aOM<Layout>(
-        2,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'layout',
+    ..aOM<Layout>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'layout',
         subBuilder: Layout.create)
     ..aOM<Transform>(
-        3,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'transform',
+        3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'transform',
         subBuilder: Transform.create)
-    ..aOS(
-        4,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'clipPath',
+    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'clipPath',
         protoName: 'clipPath')
     ..pc<ShapeEntity>(
-        5,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'shapes',
-        $pb.PbFieldType.PM,
+        5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'shapes', $pb.PbFieldType.PM,
         subBuilder: ShapeEntity.create)
     ..hasRequiredFields = false;
 
@@ -1846,10 +1650,7 @@ class FrameEntity extends $pb.GeneratedMessage {
 }
 
 class MovieEntity extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      const $core.bool.fromEnvironment('protobuf.omit_message_names')
-          ? ''
-          : 'MovieEntity',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'MovieEntity',
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
@@ -1861,34 +1662,20 @@ class MovieEntity extends $pb.GeneratedMessage {
             ? ''
             : 'version')
     ..aOM<MovieParams>(
-        2,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'params',
+        2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'params',
         subBuilder: MovieParams.create)
     ..m<$core.String, $core.List<$core.int>>(
-        3,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'images',
+        3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'images',
         entryClassName: 'MovieEntity.ImagesEntry',
         keyFieldType: $pb.PbFieldType.OS,
         valueFieldType: $pb.PbFieldType.OY,
         packageName: const $pb.PackageName('com.opensource.svga'))
     ..pc<SpriteEntity>(
         4,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'sprites',
+        const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sprites',
         $pb.PbFieldType.PM,
         subBuilder: SpriteEntity.create)
-    ..pc<AudioEntity>(
-        5,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'audios',
-        $pb.PbFieldType.PM,
-        subBuilder: AudioEntity.create)
+    ..pc<AudioEntity>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'audios', $pb.PbFieldType.PM, subBuilder: AudioEntity.create)
     ..hasRequiredFields = false;
 
   MovieEntity._() : super();
@@ -1982,7 +1769,6 @@ class MovieEntity extends $pb.GeneratedMessage {
   SVGADynamicEntity dynamicItem = SVGADynamicEntity();
   Map<String, ui.Image> bitmapCache = {};
   Map<String, ui.Path> pathCache = {};
-  Map<String, Uint8List> audiosData = {};
 
   void dispose() {
     bitmapCache.values.forEach((element) {
@@ -1990,6 +1776,5 @@ class MovieEntity extends $pb.GeneratedMessage {
     });
     bitmapCache.clear();
     pathCache.clear();
-    audiosData.clear();
   }
 }
