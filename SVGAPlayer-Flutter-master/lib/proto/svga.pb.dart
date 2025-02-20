@@ -1675,7 +1675,13 @@ class MovieEntity extends $pb.GeneratedMessage {
         const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sprites',
         $pb.PbFieldType.PM,
         subBuilder: SpriteEntity.create)
-    ..pc<AudioEntity>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'audios', $pb.PbFieldType.PM, subBuilder: AudioEntity.create)
+     ..pc<AudioEntity>(
+        5,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'audios',
+        $pb.PbFieldType.PM,
+        subBuilder: AudioEntity.create)
     ..hasRequiredFields = false;
 
   MovieEntity._() : super();
