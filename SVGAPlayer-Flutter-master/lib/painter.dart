@@ -1,5 +1,4 @@
-part of 'player.dart';
-
+part of svgaplayer_flutter_player;
 
 class _SVGAPainter extends CustomPainter {
   final BoxFit fit;

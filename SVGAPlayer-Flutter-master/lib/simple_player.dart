@@ -1,5 +1,4 @@
-part of 'player.dart';
-
+part of svgaplayer_flutter_player;
 
 class SVGASimpleImage extends StatefulWidget {
   final String? resUrl;
