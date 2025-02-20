@@ -267,7 +267,7 @@ class soundAnimation {
   Future<void> dispose() async {
     if (_isDisposed) return;
     _isDisposed = true; 
-    if (isPlaying()) stopAudio();
-    await _player.dispose();
+    if (isPlaying()) {stopAudio();
+    await _player.dispose();}
   }
 }
