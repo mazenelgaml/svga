@@ -1,7 +1,8 @@
 library svgaplayer_flutter_player;
 
 import 'dart:math';
-import 'dart:developer';
+import 'dart:developer' as developer;
+
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:flutter/rendering.dart';
@@ -236,7 +237,7 @@ class SVGAAudioLayer {
           _isReady = false;
         }
       } catch (e) {
-        log('Failed to play audio: $e');
+      developer.log('Failed to play audio: $e');
       }
     }
   }
