@@ -147,7 +147,7 @@ class _SVGAImageState extends State<SVGAImage> {
   void _handleChange() {
     if (mounted) {
       if (video == widget._controller.videoItem) {
-        handleAudio();
+        manageAudioPlayback();
       } else if (!widget._controller._isDisposed) {
         setState(() {
           video = widget._controller.videoItem;
@@ -162,19 +162,23 @@ class _SVGAImageState extends State<SVGAImage> {
     }
   }
 
-  handleAudio() {
-    final audioLayers = widget._controller.audioLayers;
-    for (final audio in audioLayers) {
-      if (!audio.isPlaying() &&
-          audio.audioItem.startFrame <= widget._controller.currentFrame &&
-          audio.audioItem.endFrame >= widget._controller.currentFrame) {
-        audio.playAudio();
-      }
-      if (audio.isPlaying() && audio.audioItem.endFrame <= widget._controller.currentFrame) {
-        audio.stopAudio();
-      }
+  void manageAudioPlayback() {
+  final audioLayers = widget._controller.audioLayers;
+  final currentFrame = widget._controller.currentFrame;
+
+  for (final audio in audioLayers) {
+    final audioItem = audio.audioItem;
+    final isPlaying = audio.isPlaying();
+
+    if (!isPlaying && audioItem.startFrame <= currentFrame && audioItem.endFrame >= currentFrame) {
+      audio.playAudio();
+    } 
+    else if (isPlaying && audioItem.endFrame < currentFrame) {
+      audio.stopAudio();
     }
   }
+}
+
 
   @override
   void dispose() {
