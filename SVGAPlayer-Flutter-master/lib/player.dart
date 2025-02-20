@@ -56,7 +56,7 @@ class SVGAImage extends StatefulWidget {
 
 class SVGAAnimationController extends AnimationController {
   MovieEntity? _videoItem;
-  final List<SVGAAudioLayer> _audioLayers = [];
+ final List<dynamic> _audioLayers = [];
   bool _canvasNeedsClear = false;
 
   SVGAAnimationController({
