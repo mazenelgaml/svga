@@ -250,6 +250,10 @@ class SVGAAudioLayer {
   void setVolume(double volume) {
     _player.setVolume(volume);
   }
+  
+  void muteAudio(bool mute) {
+  _player.setVolume(mute ? 0 : 1);
+}
 
   bool isPlaying() => _player.state == PlayerState.playing;
   bool isPaused() => _player.state == PlayerState.paused;
