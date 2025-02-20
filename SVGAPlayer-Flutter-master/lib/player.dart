@@ -261,8 +261,8 @@ class soundAnimation {
   _player.setVolume(mute ? 0 : 1);
 }
 
-  bool isPlaying() => _player.state == PlayerState.playing;
-  bool isPaused() => _player.state == PlayerState.paused;
+  bool isPlaying() => !_isDisposed && _player.state == PlayerState.playing;
+  bool isPaused() => !_isDisposed && _player.state == PlayerState.paused;
 
   Future<void> dispose() async {
     if (_isDisposed) return;
