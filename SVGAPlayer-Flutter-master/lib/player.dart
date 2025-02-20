@@ -225,10 +225,10 @@ class soundAnimation {
   bool _isReady = false;
   bool _isDisposed = false;
 
-  // تعريف _audioLayers لمنع الأخطاء
+
   List<soundAnimation> _audioLayers = [];
 
-  // تعريف videoItem لمنع الأخطاء
+ 
   MovieEntity? videoItem;
 
   soundAnimation(this.audioItem, this._videoItem);

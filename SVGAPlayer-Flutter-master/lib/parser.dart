@@ -6,7 +6,7 @@ import 'package:flutter/painting.dart' show decodeImageFromList;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' show get;
 import 'package:archive/archive.dart' as archive;
-// ignore: import_of_legacy_library_into_null_safe
+
 import 'proto/svga.pbserver.dart';
 
 const _filterKey = 'SVGAParser';
