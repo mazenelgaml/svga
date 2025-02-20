@@ -3,7 +3,9 @@ import 'package:svgaplayer_flutter/audio_layer.dart';
 import 'dart:math';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:svgaplayer_flutter/proto/svga.pb.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'proto/svga.pbserver.dart';
 import 'dart:typed_data';
 import 'package:path_drawing/path_drawing.dart';
@@ -15,8 +17,22 @@ class SVGAImage extends StatefulWidget {
   final SVGAAnimationController _controller;
   final BoxFit fit;
   final bool clearsAfterStop;
+
+  /// Used to set the filterQuality of drawing the images inside SVGA.
+  ///
+  /// Defaults to [FilterQuality.low]
   final FilterQuality filterQuality;
+
+  /// If `true`, the SVGA painter may draw beyond the expected canvas bounds
+  /// and cause additional memory overhead.
+  ///
+  /// For backwards compatibility, defaults to `null`,
+  /// which means allow drawing to overflow canvas bounds.
   final bool? allowDrawingOverflow;
+
+  /// If `null`, the viewbox size of [MovieEntity] will be use.
+  ///
+  /// Defaults to null.
   final Size? preferredSize;
   const SVGAImage(
     this._controller, {
@@ -43,42 +59,76 @@ class SVGAAnimationController extends AnimationController {
   final List<SVGAAudioLayer> _audioLayers = [];
   bool _canvasNeedsClear = false;
 
-  SVGAAnimationController({required super.vsync}) : super(duration: Duration.zero);
+  SVGAAnimationController({
+    required super.vsync,
+  }) : super(duration: Duration.zero);
 
   set videoItem(MovieEntity? value) {
+    assert(!_isDisposed, '$this has been disposed!');
+    if (_isDisposed) return;
     if (isAnimating) {
       stop();
     }
     if (value == null) {
       clear();
     }
+    if (_videoItem != null && _videoItem!.autorelease) {
+      _videoItem!.dispose();
+    }
     _videoItem = value;
     if (value != null) {
       final movieParams = value.params;
-      int fps = movieParams.fps == 0 ? 20 : movieParams.fps;
-      duration = Duration(milliseconds: (movieParams.frames / fps * 1000).toInt());
+      assert(
+          movieParams.viewBoxWidth >= 0 &&
+              movieParams.viewBoxHeight >= 0 &&
+              movieParams.frames >= 1,
+          "Invalid SVGA file!");
+      int fps = movieParams.fps;
+      // avoid dividing by 0, use 20 by default
+      // see https://github.com/svga/SVGAPlayer-Web/blob/1c5711db068a25006316f9890b11d6666d531c39/src/videoEntity.js#L51
+      if (fps == 0) fps = 20;
+      duration =
+          Duration(milliseconds: (movieParams.frames / fps * 1000).toInt());
+
       for (var audio in value.audios) {
         _audioLayers.add(SVGAAudioLayer(audio, value));
       }
     } else {
       duration = Duration.zero;
     }
+    // reset progress after videoitem changed
     reset();
   }
 
   MovieEntity? get videoItem => _videoItem;
 
-  int get currentFrame => _videoItem == null ? 0 : min(_videoItem!.params.frames - 1, max(0, (_videoItem!.params.frames.toDouble() * value).toInt()));
+  /// Current drawing frame index of [videoItem], returns 0 if [videoItem] is null.
+  int get currentFrame {
+    final videoItem = _videoItem;
+    if (videoItem == null) return 0;
+    return min(
+      videoItem.params.frames - 1,
+      max(0, (videoItem.params.frames.toDouble() * value).toInt()),
+    );
+  }
 
-  int get frames => _videoItem?.params.frames ?? 0;
+  /// Total frames of [videoItem], returns 0 if [videoItem] is null.
+  int get frames {
+    final videoItem = _videoItem;
+    if (videoItem == null) return 0;
+    return videoItem.params.frames;
+  }
 
+  /// mark [_SVGAPainter] needs clear
   void clear() {
     _canvasNeedsClear = true;
-    notifyListeners();
+    if (!_isDisposed) notifyListeners();
   }
 
   @override
   TickerFuture forward({double? from}) {
+    assert(_videoItem != null,
+        'SVGAAnimationController.forward() called after dispose()?');
     return super.forward(from: from);
   }
 
@@ -90,12 +140,15 @@ class SVGAAnimationController extends AnimationController {
     super.stop(canceled: canceled);
   }
 
+  bool _isDisposed = false;
   @override
   void dispose() {
     for (final audio in _audioLayers) {
       audio.dispose();
     }
+    // auto dispose _videoItem when set null
     videoItem = null;
+    _isDisposed = true;
     super.dispose();
   }
 }
@@ -129,6 +182,7 @@ class _SVGAImageState extends State<SVGAImage> {
         handleAudio();
       } else if (!widget._controller._isDisposed) {
         setState(() {
+          // rebuild
           video = widget._controller.videoItem;
         });
       }
@@ -176,16 +230,20 @@ class _SVGAImageState extends State<SVGAImage> {
     if (viewBoxSize.isEmpty) {
       return const SizedBox.shrink();
     }
+    // sugguest the size of CustomPaint
     Size preferredSize = viewBoxSize;
     if (widget.preferredSize != null) {
-      preferredSize = BoxConstraints.tight(widget.preferredSize!).constrain(viewBoxSize);
+      preferredSize =
+          BoxConstraints.tight(widget.preferredSize!).constrain(viewBoxSize);
     }
     return IgnorePointer(
       child: CustomPaint(
         painter: _SVGAPainter(
+          // _SVGAPainter will auto repaint on _controller animating
           widget._controller,
           fit: widget.fit,
           filterQuality: widget.filterQuality,
+          // default is allowing overflow for backward compatibility
           clipRect: widget.allowDrawingOverflow == false,
         ),
         size: preferredSize,
