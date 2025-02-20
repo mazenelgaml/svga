@@ -76,7 +76,7 @@ class SVGAParser {
     return Future.wait(images.entries.map((item) async {
       // result null means a decoding error occurred
       Uint8List data = Uint8List.fromList(item.value);
-      if (isMP3Data(data)) {
+      if (getSound(data)) {
         movieItem.audiosData[item.key] = data;
       } else {
         final decodeImage =
@@ -95,7 +95,7 @@ Future<ui.Image?> _decodeImageItem(String key, Uint8List bytes,
     return null;
   }
 
-  if (isMP3Data(bytes)) {
+  if (getSound(bytes)) {
     log('Skipping image decoding for audio file: $key');
     return null;
   }
@@ -131,16 +131,25 @@ Future<ui.Image?> _decodeImageItem(String key, Uint8List bytes,
   }
 }
 
+bool getSound(Uint8List data) {
+  try {
+    print("Checking for sound...");
 
-  bool isMP3Data(Uint8List data) {
-    print("sound");
-    const mp3MagicNumber = 'ID3';
-    bool result = false;
-    if (String.fromCharCodes(data.take(mp3MagicNumber.length)) ==
-        mp3MagicNumber) {
-      result = true;
+    const String mp3MagicNumber = 'ID3';
+    if (data.length < mp3MagicNumber.length) {
+      return false; // البيانات غير كافية للتحقق
     }
-    return result;
+
+    String header = String.fromCharCodes(data.take(mp3MagicNumber.length));
+    bool hasSound = header.startsWith(mp3MagicNumber);
+
+    print("Sound detected: $hasSound");
+    return hasSound;
+  } catch (e) {
+    print("Error checking sound: $e");
+    return false; // في حالة حدوث خطأ، نعتبر أنه لا يوجد صوت
   }
+}
+
 }
 
