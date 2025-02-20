@@ -217,7 +217,7 @@ class _SVGAImageState extends State<SVGAImage> {
 class soundAnimation {
   final AudioPlayer _player = AudioPlayer();
   late final AudioEntity audioItem;
-  late final MovieEntity _videoItem;
+  late MovieEntity? videoItem;
   bool _isReady = false;
   bool _isDisposed = false;
 List<soundAnimation> _audioLayers = [];
