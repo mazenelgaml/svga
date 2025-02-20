@@ -1,10 +1,13 @@
 library svgaplayer_flutter_player;
 
 import 'dart:math';
+import 'dart:developer' as developer;
+
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:path_drawing/path_drawing.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:svgaplayer_flutter/proto/svga.pb.dart';
@@ -33,16 +36,20 @@ class SVGAImage extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() => _SVGAImageState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Listenable>('controller', _controller));
+  }
 }
 
 class SVGAAnimationController extends AnimationController {
   MovieEntity? _videoItem;
-  final List<SoundAnimation> _audioLayers = [];
+  final List<soundAnimation> _audioLayers = [];
   bool _canvasNeedsClear = false;
-  bool _isDisposed = false;
 
-  List<SoundAnimation> get audioLayers => _audioLayers;
-  
+ List<soundAnimation> get audioLayers => _audioLayers;
   SVGAAnimationController({required super.vsync}) : super(duration: Duration.zero);
 
   set videoItem(MovieEntity? value) {
@@ -61,12 +68,26 @@ class SVGAAnimationController extends AnimationController {
       duration = Duration(milliseconds: (movieParams.frames / fps * 1000).toInt());
 
       for (var audio in value.audios) {
-        _audioLayers.add(SoundAnimation(audio, value));
+        _audioLayers.add(soundAnimation(audio, value));
       }
     } else {
       duration = Duration.zero;
     }
     reset();
+  }
+
+  MovieEntity? get videoItem => _videoItem;
+
+  int get currentFrame {
+    final videoItem = _videoItem;
+    if (videoItem == null) return 0;
+    return min(videoItem.params.frames - 1, max(0, (videoItem.params.frames.toDouble() * value).toInt()));
+  }
+
+  int get frames {
+    final videoItem = _videoItem;
+    if (videoItem == null) return 0;
+    return videoItem.params.frames;
   }
 
   void clear() {
@@ -75,28 +96,135 @@ class SVGAAnimationController extends AnimationController {
   }
 
   @override
+  TickerFuture forward({double? from}) {
+    assert(_videoItem != null, 'SVGAAnimationController.forward() called after dispose()?');
+    return super.forward(from: from);
+  }
+
+  @override
+  void stop({bool canceled = true}) {
+    for (final audio in _audioLayers) {
+      audio.pauseAudio();
+    }
+    super.stop(canceled: canceled);
+  }
+
+  bool _isDisposed = false;
+  @override
   void dispose() {
-    if (_isDisposed) return;
-    _isDisposed = true;
     for (final audio in _audioLayers) {
       audio.dispose();
     }
-    _audioLayers.clear();
     videoItem = null;
+    _isDisposed = true;
     super.dispose();
   }
 }
 
-class SoundAnimation {
+class _SVGAImageState extends State<SVGAImage> {
+  MovieEntity? video;
+
+  @override
+  void initState() {
+    super.initState();
+    video = widget._controller.videoItem;
+    widget._controller.addListener(_handleChange);
+    widget._controller.addStatusListener(_handleStatusChange);
+  }
+
+  @override
+  void didUpdateWidget(SVGAImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget._controller != widget._controller) {
+      oldWidget._controller.removeListener(_handleChange);
+      oldWidget._controller.removeStatusListener(_handleStatusChange);
+      video = widget._controller.videoItem;
+      widget._controller.addListener(_handleChange);
+      widget._controller.addStatusListener(_handleStatusChange);
+    }
+  }
+
+  void _handleChange() {
+    if (mounted) {
+      if (video == widget._controller.videoItem) {
+        handleAudio();
+      } else if (!widget._controller._isDisposed) {
+        setState(() {
+          video = widget._controller.videoItem;
+        });
+      }
+    }
+  }
+
+  void _handleStatusChange(AnimationStatus status) {
+    if (status == AnimationStatus.completed && widget.clearsAfterStop) {
+      widget._controller.clear();
+    }
+  }
+
+  handleAudio() {
+    final audioLayers = widget._controller.audioLayers;
+    for (final audio in audioLayers) {
+      if (!audio.isPlaying() &&
+          audio.audioItem.startFrame <= widget._controller.currentFrame &&
+          audio.audioItem.endFrame >= widget._controller.currentFrame) {
+        audio.playAudio();
+      }
+      if (audio.isPlaying() && audio.audioItem.endFrame <= widget._controller.currentFrame) {
+        audio.stopAudio();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    video = null;
+    widget._controller.removeListener(_handleChange);
+    widget._controller.removeStatusListener(_handleStatusChange);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final video = this.video;
+    final Size viewBoxSize;
+    if (video == null || !video.isInitialized()) {
+      viewBoxSize = Size.zero;
+    } else {
+      viewBoxSize = Size(video.params.viewBoxWidth, video.params.viewBoxHeight);
+    }
+    if (viewBoxSize.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    Size preferredSize = viewBoxSize;
+    if (widget.preferredSize != null) {
+      preferredSize = BoxConstraints.tight(widget.preferredSize!).constrain(viewBoxSize);
+    }
+    return IgnorePointer(
+      child: CustomPaint(
+        painter: _SVGAPainter(
+          widget._controller,
+          fit: widget.fit,
+          filterQuality: widget.filterQuality,
+          clipRect: widget.allowDrawingOverflow == false,
+        ),
+        size: preferredSize,
+      ),
+    );
+  }
+}
+
+class soundAnimation {
   final AudioPlayer _player = AudioPlayer();
-  final AudioEntity audioItem;
-  final MovieEntity _videoItem;
+  late final AudioEntity audioItem;
+  late final MovieEntity _videoItem;
+  bool _isReady = false;
   bool _isDisposed = false;
 
-  SoundAnimation(this.audioItem, this._videoItem);
+  soundAnimation(this.audioItem, this._videoItem);
 
   Future<void> playAudio() async {
-    if (_isDisposed || isPlaying()) return;
+     if (_isDisposed || isPlaying()) return;
     final audioData = _videoItem.audiosData[audioItem.audioKey];
     if (audioData != null) {
       final cacheDir = await getApplicationCacheDirectory();
@@ -105,41 +233,40 @@ class SoundAnimation {
         await cacheFile.writeAsBytes(audioData);
       }
       try {
-        if (!_isDisposed) {
+        if (!_isReady) {
+          _isReady = true;
           await _player.play(DeviceFileSource(cacheFile.path));
+          _isReady = false;
         }
       } catch (e) {
-        debugPrint('Failed to play audio: $e'); 
+       debugPrint('Failed to play audio: $e'); 
       }
     }
   }
 
-  void pauseAudio() {
-    if (_isDisposed || !_player.state.isPlaying) return;
-    _player.pause();
-  }
-
+  void pauseAudio() => _player.pause();
+  void resumeAudio() => _player.resume();
   void stopAudio() {
-    if (_isDisposed || (!_player.state.isPlaying && !_player.state.isPaused)) return;
+     if (_isDisposed || (!isPlaying() && !isPaused())) return;
     _player.stop();
   }
 
   void setVolume(double volume) {
-    if (_isDisposed) return;
+     if (_isDisposed) return;
     _player.setVolume(volume);
   }
-
+  
   void muteAudio(bool mute) {
-    if (_isDisposed) return;
-    _player.setVolume(mute ? 0 : 1);
-  }
+     if (_isDisposed) return;
+  _player.setVolume(mute ? 0 : 1);
+}
 
   bool isPlaying() => _player.state == PlayerState.playing;
   bool isPaused() => _player.state == PlayerState.paused;
 
   Future<void> dispose() async {
     if (_isDisposed) return;
-    _isDisposed = true;
+    _isDisposed = true; 
     if (isPlaying()) stopAudio();
     await _player.dispose();
   }
