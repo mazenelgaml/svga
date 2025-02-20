@@ -46,10 +46,10 @@ class SVGAImage extends StatefulWidget {
 
 class SVGAAnimationController extends AnimationController {
   MovieEntity? _videoItem;
-  final List<SVGAAudioLayer> _audioLayers = [];
+  final List<soundAnimation> _audioLayers = [];
   bool _canvasNeedsClear = false;
 
- List<SVGAAudioLayer> get audioLayers => _audioLayers;
+ List<soundAnimation> get audioLayers => _audioLayers;
   SVGAAnimationController({required super.vsync}) : super(duration: Duration.zero);
 
   set videoItem(MovieEntity? value) {
@@ -68,7 +68,7 @@ class SVGAAnimationController extends AnimationController {
       duration = Duration(milliseconds: (movieParams.frames / fps * 1000).toInt());
 
       for (var audio in value.audios) {
-        _audioLayers.add(SVGAAudioLayer(audio, value));
+        _audioLayers.add(soundAnimation(audio, value));
       }
     } else {
       duration = Duration.zero;
@@ -214,13 +214,13 @@ class _SVGAImageState extends State<SVGAImage> {
   }
 }
 
-class SVGAAudioLayer {
+class soundAnimation {
   final AudioPlayer _player = AudioPlayer();
   late final AudioEntity audioItem;
   late final MovieEntity _videoItem;
   bool _isReady = false;
 
-  SVGAAudioLayer(this.audioItem, this._videoItem);
+  soundAnimation(this.audioItem, this._videoItem);
 
   Future<void> playAudio() async {
     final audioData = _videoItem.audiosData[audioItem.audioKey];

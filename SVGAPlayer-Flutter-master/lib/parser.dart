@@ -15,7 +15,25 @@ const _filterKey = 'SVGAParser';
 class SVGAParser {
   const SVGAParser();
   static const shared = SVGAParser();
+  bool getSound(Uint8List data) {
+  try {
+    print("Checking for sound...");
 
+    const String mp3MagicNumber = 'ID3';
+    if (data.length < mp3MagicNumber.length) {
+      return false; // البيانات غير كافية للتحقق
+    }
+
+    String header = String.fromCharCodes(data.take(mp3MagicNumber.length));
+    bool hasSound = header.startsWith(mp3MagicNumber);
+
+    print("Sound detected: $hasSound");
+    return hasSound;
+  } catch (e) {
+    print("Error checking sound: $e");
+    return false; // في حالة حدوث خطأ، نعتبر أنه لا يوجد صوت
+  }
+}
   /// Download animation file from remote server, and decode it.
   Future<MovieEntity> decodeFromURL(String url) async {
     final response = await get(Uri.parse(url));
@@ -131,25 +149,6 @@ Future<ui.Image?> _decodeImageItem(String key, Uint8List bytes,
   }
 }
 
-bool getSound(Uint8List data) {
-  try {
-    print("Checking for sound...");
-
-    const String mp3MagicNumber = 'ID3';
-    if (data.length < mp3MagicNumber.length) {
-      return false; // البيانات غير كافية للتحقق
-    }
-
-    String header = String.fromCharCodes(data.take(mp3MagicNumber.length));
-    bool hasSound = header.startsWith(mp3MagicNumber);
-
-    print("Sound detected: $hasSound");
-    return hasSound;
-  } catch (e) {
-    print("Error checking sound: $e");
-    return false; // في حالة حدوث خطأ، نعتبر أنه لا يوجد صوت
-  }
-}
 
 }
 
