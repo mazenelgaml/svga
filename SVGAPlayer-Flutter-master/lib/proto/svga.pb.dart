@@ -1650,6 +1650,8 @@ class FrameEntity extends $pb.GeneratedMessage {
 }
 
 class MovieEntity extends $pb.GeneratedMessage {
+  List<dynamic> _audioLayers = [];
+
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'MovieEntity',
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
