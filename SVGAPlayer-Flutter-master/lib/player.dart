@@ -217,15 +217,15 @@ class _SVGAImageState extends State<SVGAImage> {
 class soundAnimation {
   final AudioPlayer _player = AudioPlayer();
   late final AudioEntity audioItem;
-  late MovieEntity? videoItem;
+  late final MovieEntity _videoItem;
   bool _isReady = false;
   bool _isDisposed = false;
-List<soundAnimation> _audioLayers = [];
-  soundAnimation(this.audioItem, this.videoItem);
+
+  soundAnimation(this.audioItem, this._videoItem);
 
   Future<void> playAudio() async {
      if (_isDisposed || isPlaying()) return;
-    final audioData = videoItem.audiosData[audioItem.audioKey];
+    final audioData = _videoItem.audiosData[audioItem.audioKey];
     if (audioData != null) {
       final cacheDir = await getApplicationCacheDirectory();
       final cacheFile = File('${cacheDir.path}/temp_${audioItem.audioKey}.mp3');
