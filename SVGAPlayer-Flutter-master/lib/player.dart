@@ -162,7 +162,7 @@ class _SVGAImageState extends State<SVGAImage> {
   }
 
   handleAudio() {
-    final audioLayers = widget._controller._audioLayers;
+    final audioLayers = widget._controller.audioLayers;
     for (final audio in audioLayers) {
       if (!audio.isPlaying() &&
           audio.audioItem.startFrame <= widget._controller.currentFrame &&
