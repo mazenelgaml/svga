@@ -214,7 +214,7 @@ class _SVGAImageState extends State<SVGAImage> {
   }
 }
 
-class soundAnimation {
+class soundAnimation extends ChangeNotifier{
   final AudioPlayer _player = AudioPlayer();
   late final AudioEntity audioItem;
   late final MovieEntity _videoItem;
