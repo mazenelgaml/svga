@@ -1,120 +1,99 @@
 import 'package:flutter/material.dart';
-import 'package:svgaplayer_flutter/parser.dart';
-import 'package:svgaplayer_flutter/player.dart';
+import 'package:flutter/rendering.dart';
 import 'package:svgaplayer_flutter/proto/svga.pb.dart';
+import 'package:svgaplayer_flutter/parser.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'audio_handler.dart';
 
-class SVGADisplayScreen extends StatefulWidget {
-  final String svgaUrl;
-  const SVGADisplayScreen({Key? key, required this.svgaUrl}) : super(key: key);
+class SVGAImage extends StatefulWidget {
+  final SVGAAnimationController controller;
+
+  const SVGAImage(this.controller, {Key? key}) : super(key: key);
 
   @override
-  _SVGADisplayScreenState createState() => _SVGADisplayScreenState();
+  _SVGAImageState createState() => _SVGAImageState();
 }
 
-class _SVGADisplayScreenState extends State<SVGADisplayScreen> with SingleTickerProviderStateMixin {
-  late SVGAAnimationController animationController;
-  bool isLoading = true;
-  bool isMuted = false;
-  bool hasAudio = false;
-  bool isPlaying = true;
-  final AudioHandler _audioHandler = AudioHandler();
+class SVGAAnimationController extends AnimationController {
+  MovieEntity? _videoItem;
+  bool _isDisposed = false;
+
+  SVGAAnimationController({required TickerProvider vsync}) : super(vsync: vsync, duration: Duration.zero);
+
+  set videoItem(MovieEntity? value) {
+    if (_isDisposed) return;
+    if (isAnimating) stop();
+    _videoItem = value;
+    if (value != null) {
+      int fps = value.params.fps > 0 ? value.params.fps : 20;
+      duration = Duration(milliseconds: (value.params.frames / fps * 1000).toInt());
+    } else {
+      duration = Duration.zero;
+    }
+    reset();
+  }
+
+  MovieEntity? get videoItem => _videoItem;
+
+  void clear() {
+    if (!_isDisposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _videoItem = null;
+    _isDisposed = true;
+    super.dispose();
+  }
+}
+
+class _SVGAImageState extends State<SVGAImage> {
+  MovieEntity? video;
 
   @override
   void initState() {
     super.initState();
-    animationController = SVGAAnimationController(vsync: this);
-    loadAnimation();
+    video = widget.controller.videoItem;
+    widget.controller.addListener(_handleChange);
   }
 
-  Future<void> loadAnimation() async {
-    try {
-      final videoItem = await loadVideoItem(widget.svgaUrl);
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-          animationController.videoItem = videoItem;
-          hasAudio = videoItem.audios.isNotEmpty;
-          animationController.repeat();
-          isPlaying = true;
-        });
-
-        if (hasAudio) {
-          _audioHandler.playAudioFromSVGA(videoItem);
-        }
-      }
-    } catch (e) {
-      print("Error loading SVGA: $e");
-    }
-  }
-
-  void toggleMute() {
-    setState(() {
-      isMuted = !isMuted;
-      _audioHandler.muteAudio(isMuted);
-    });
-  }
-
-  void togglePlayPause() {
-    setState(() {
-      if (isPlaying) {
-        animationController.stop();
-        _audioHandler.pauseAudio();
-      } else {
-        animationController.repeat();
-        _audioHandler.resumeAudio();
-      }
-      isPlaying = !isPlaying;
-    });
-  }
-
-  Future<MovieEntity> loadVideoItem(String url) async {
-    try {
-      return url.startsWith("http") ? await SVGAParser.shared.decodeFromURL(url) : await SVGAParser.shared.decodeFromAssets(url);
-    } catch (e) {
-      print("Error loading SVGA file: $e");
-      rethrow;
+  void _handleChange() {
+    if (mounted) {
+      setState(() {
+        video = widget.controller.videoItem;
+      });
     }
   }
 
   @override
   void dispose() {
-    _audioHandler.dispose();
-    animationController.dispose();
+    widget.controller.removeListener(_handleChange);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("SVGA Animation")),
-      body: Center(
-        child: isLoading
-            ? const CircularProgressIndicator()
-            : Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  Center(child: SVGAImage(animationController)),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 25),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        IconButton(
-                          icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
-                          onPressed: togglePlayPause,
-                        ),
-                        if (hasAudio)
-                          IconButton(
-                            icon: Icon(isMuted ? Icons.volume_off : Icons.volume_up),
-                            onPressed: toggleMute,
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+    if (video == null) return const SizedBox.shrink();
+
+    return IgnorePointer(
+      child: CustomPaint(
+        painter: _SVGAPainter(widget.controller),
+        size: Size(video!.params.viewBoxWidth, video!.params.viewBoxHeight),
       ),
     );
   }
+}
+
+class _SVGAPainter extends CustomPainter {
+  final SVGAAnimationController controller;
+
+  _SVGAPainter(this.controller);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // إضافة منطق الرسم هنا
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
