@@ -35,6 +35,12 @@ class SVGAAnimationController extends AnimationController {
 
   MovieEntity? get videoItem => _videoItem;
 
+  void startAnimation() {
+    if (_videoItem != null) {
+      forward(from: 0.0);
+    }
+  }
+
   void clear() {
     if (!_isDisposed) notifyListeners();
   }
