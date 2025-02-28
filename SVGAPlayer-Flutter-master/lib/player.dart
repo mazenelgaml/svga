@@ -6,15 +6,6 @@ import 'package:svgaplayer_flutter/svgaplayer_flutter.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'audio_handler.dart';
 
-class SVGAImage extends StatefulWidget {
-  final String assetName;
-
-  const SVGAImage(this.assetName, {Key? key}) : super(key: key);
-
-  @override
-  _SVGAImageState createState() => _SVGAImageState();
-}
-
 class SVGAAnimationController extends AnimationController {
   MovieEntity? _videoItem;
   bool _isDisposed = false;
@@ -48,58 +39,64 @@ class SVGAAnimationController extends AnimationController {
   }
 }
 
-class _SVGAImageState extends State<SVGAImage> with SingleTickerProviderStateMixin {
+class SVGADisplayScreen extends StatefulWidget {
+  final String svgaUrl;
+  const SVGADisplayScreen({super.key, required this.svgaUrl});
+
+  @override
+  _SVGADisplayScreenState createState() => _SVGADisplayScreenState();
+}
+
+class _SVGADisplayScreenState extends State<SVGADisplayScreen> with SingleTickerProviderStateMixin {
   late SVGAAnimationController _animationController;
-  final SVGAParser _parser = SVGAParser();
+  bool isLoading = true;
+  bool hasAudio = false;
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   @override
   void initState() {
     super.initState();
     _animationController = SVGAAnimationController(vsync: this);
-    _loadAnimation();
-    _playAudio();
+    loadAnimation();
   }
 
-  void _loadAnimation() async {
+  Future<void> loadAnimation() async {
     try {
-      final videoItem = await _parser.decodeFromAssets(widget.assetName);
+      final videoItem = await SVGAParser().decodeFromAssets(widget.svgaUrl);
       if (mounted) {
         setState(() {
           _animationController.videoItem = videoItem;
+          hasAudio = videoItem.audios.isNotEmpty;
+          isLoading = false;
         });
-        _animationController.repeat();
+        _animationController.forward(from: 0.0);
       }
     } catch (e) {
       print("Error loading SVGA: $e");
     }
   }
 
-  void _playAudio() async {
-    try {
-      await _audioPlayer.setSource(AssetSource('audio/sound.mp3'));
-      _audioPlayer.resume();
-    } catch (e) {
-      print("Error playing audio: $e");
-    }
-  }
-
   @override
   void dispose() {
-    _animationController.dispose();
     _audioPlayer.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        width: 200,
-        height: 200,
-        child: _animationController.videoItem != null
-            ? SVGASimpleImage(controller: _animationController)
-            : CircularProgressIndicator(),
+    return Scaffold(
+      appBar: AppBar(title: const Text("SVGA Animation")),
+      body: Center(
+        child: isLoading
+            ? const CircularProgressIndicator()
+            : SizedBox(
+          width: double.infinity,
+          height: double.infinity,
+          child: _animationController.videoItem != null
+              ? SVGASimpleImage(controller: _animationController)
+              : const SizedBox.shrink(),
+        ),
       ),
     );
   }
