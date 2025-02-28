@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:svgaplayer_flutter/proto/svga.pb.dart';
 import 'package:svgaplayer_flutter/parser.dart';
+import 'package:svgaplayer_flutter/svgaplayer_flutter.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'audio_handler.dart';
 
 class SVGAImage extends StatefulWidget {
-  final SVGAAnimationController controller;
+  final String assetName;
 
-  const SVGAImage(this.controller, {Key? key}) : super(key: key);
+  const SVGAImage(this.assetName, {Key? key}) : super(key: key);
 
   @override
   _SVGAImageState createState() => _SVGAImageState();
@@ -47,53 +48,50 @@ class SVGAAnimationController extends AnimationController {
   }
 }
 
-class _SVGAImageState extends State<SVGAImage> {
-  MovieEntity? video;
+class _SVGAImageState extends State<SVGAImage> with SingleTickerProviderStateMixin {
+  late SVGAAnimationController _animationController;
+  late SVGAParser _parser;
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   @override
   void initState() {
     super.initState();
-    video = widget.controller.videoItem;
-    widget.controller.addListener(_handleChange);
+    _parser = SVGAParser();
+    _animationController = SVGAAnimationController(vsync: this);
+    _loadAnimation();
+    _playAudio();
   }
 
-  void _handleChange() {
+  void _loadAnimation() async {
+    final videoItem = await _parser.decodeFromAssets(widget.assetName);
     if (mounted) {
       setState(() {
-        video = widget.controller.videoItem;
+        _animationController.videoItem = videoItem;
       });
+      _animationController.repeat();
     }
+  }
+
+  void _playAudio() async {
+    await _audioPlayer.setSource(AssetSource('audio/sound.mp3'));
+    _audioPlayer.resume();
   }
 
   @override
   void dispose() {
-    widget.controller.removeListener(_handleChange);
+    _animationController.dispose();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (video == null) return const SizedBox.shrink();
-
-    return IgnorePointer(
-      child: CustomPaint(
-        painter: _SVGAPainter(widget.controller),
-        size: Size(video!.params.viewBoxWidth, video!.params.viewBoxHeight),
+    return Center(
+      child: SizedBox(
+        width: 200,
+        height: 200,
+        child: SVGASimpleImage(controller: _animationController),
       ),
     );
   }
-}
-
-class _SVGAPainter extends CustomPainter {
-  final SVGAAnimationController controller;
-
-  _SVGAPainter(this.controller);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // إضافة منطق الرسم هنا
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
