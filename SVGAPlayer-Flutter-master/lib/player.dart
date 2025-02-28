@@ -2,9 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:svgaplayer_flutter/proto/svga.pb.dart';
 import 'package:svgaplayer_flutter/parser.dart';
-import 'package:svgaplayer_flutter/svgaplayer_flutter.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'audio_handler.dart';
+
+class SVGAImage extends StatefulWidget {
+  final SVGAAnimationController controller;
+
+  const SVGAImage(this.controller, {Key? key}) : super(key: key);
+
+  @override
+  _SVGAImageState createState() => _SVGAImageState();
+}
 
 class SVGAAnimationController extends AnimationController {
   MovieEntity? _videoItem;
@@ -39,65 +47,53 @@ class SVGAAnimationController extends AnimationController {
   }
 }
 
-class SVGADisplayScreen extends StatefulWidget {
-  final String svgaUrl;
-  const SVGADisplayScreen({super.key, required this.svgaUrl});
-
-  @override
-  _SVGADisplayScreenState createState() => _SVGADisplayScreenState();
-}
-
-class _SVGADisplayScreenState extends State<SVGADisplayScreen> with SingleTickerProviderStateMixin {
-  late SVGAAnimationController _animationController;
-  bool isLoading = true;
-  bool hasAudio = false;
-  final AudioPlayer _audioPlayer = AudioPlayer();
+class _SVGAImageState extends State<SVGAImage> {
+  MovieEntity? video;
 
   @override
   void initState() {
     super.initState();
-    _animationController = SVGAAnimationController(vsync: this);
-    loadAnimation();
+    video = widget.controller.videoItem;
+    widget.controller.addListener(_handleChange);
   }
 
-  Future<void> loadAnimation() async {
-    try {
-      final videoItem = await SVGAParser().decodeFromAssets(widget.svgaUrl);
-      if (mounted) {
-        setState(() {
-          _animationController.videoItem = videoItem;
-          hasAudio = videoItem.audios.isNotEmpty;
-          isLoading = false;
-        });
-        _animationController.forward(from: 0.0);
-      }
-    } catch (e) {
-      print("Error loading SVGA: $e");
+  void _handleChange() {
+    if (mounted) {
+      setState(() {
+        video = widget.controller.videoItem;
+      });
     }
   }
 
   @override
   void dispose() {
-    _audioPlayer.dispose();
-    _animationController.dispose();
+    widget.controller.removeListener(_handleChange);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("SVGA Animation")),
-      body: Center(
-        child: isLoading
-            ? const CircularProgressIndicator()
-            : SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-          child: _animationController.videoItem != null
-              ? SVGASimpleImage(controller: _animationController)
-              : const SizedBox.shrink(),
-        ),
+    if (video == null) return const SizedBox.shrink();
+
+    return IgnorePointer(
+      child: CustomPaint(
+        painter: _SVGAPainter(widget.controller),
+        size: Size(video!.params.viewBoxWidth, video!.params.viewBoxHeight),
       ),
     );
   }
+}
+
+class _SVGAPainter extends CustomPainter {
+  final SVGAAnimationController controller;
+
+  _SVGAPainter(this.controller);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // إضافة منطق الرسم هنا
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
