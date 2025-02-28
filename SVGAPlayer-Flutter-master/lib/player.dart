@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:svgaplayer_flutter/proto/svga.pb.dart';
 import 'package:svgaplayer_flutter/parser.dart';
-import 'package:audioplayers/audioplayers.dart';
-import 'audio_handler.dart';
 
 class SVGAImage extends StatefulWidget {
   final SVGAAnimationController controller;
@@ -14,11 +11,88 @@ class SVGAImage extends StatefulWidget {
   _SVGAImageState createState() => _SVGAImageState();
 }
 
+class _SVGAImageState extends State<SVGAImage> {
+  MovieEntity? video;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_handleChange);
+  }
+
+  void _handleChange() {
+    if (mounted) {
+      setState(() {
+        video = widget.controller.videoItem;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_handleChange);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.controller.videoItem == null) return const SizedBox.shrink();
+
+    return IgnorePointer(
+      child: CustomPaint(
+        painter: _SVGAPainter(widget.controller),
+        size: Size(
+          widget.controller.videoItem!.params.viewBoxWidth,
+          widget.controller.videoItem!.params.viewBoxHeight,
+        ),
+      ),
+    );
+  }
+}
+
+class _SVGAPainter extends CustomPainter {
+  final SVGAAnimationController controller;
+
+  _SVGAPainter(this.controller);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (controller.videoItem == null) return;
+
+    final videoItem = controller.videoItem!;
+    final frames = videoItem.sprites;
+    if (frames.isEmpty) return;
+
+    final currentFrame = (controller.value * frames.length).toInt() % frames.length;
+    final sprite = frames[currentFrame];
+
+    if (sprite.image != null) {
+      canvas.drawImage(sprite.image!, Offset.zero, Paint());
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
 class SVGAAnimationController extends AnimationController {
   MovieEntity? _videoItem;
   bool _isDisposed = false;
 
-  SVGAAnimationController({required TickerProvider vsync}) : super(vsync: vsync, duration: Duration.zero);
+  SVGAAnimationController({required TickerProvider vsync})
+      : super(vsync: vsync, duration: Duration.zero);
+
+  Future<void> loadAnimation(String assetName) async {
+    final parser = SVGAParser();
+    final videoItem = await parser.decodeFromAssets(assetName);
+    if (!_isDisposed && videoItem != null) {
+      videoItem = videoItem;
+      int fps = videoItem.params.fps > 0 ? videoItem.params.fps : 20;
+      duration = Duration(milliseconds: (videoItem.params.frames / fps * 1000).toInt());
+      reset();
+      notifyListeners();
+    }
+  }
 
   set videoItem(MovieEntity? value) {
     if (_isDisposed) return;
@@ -47,53 +121,39 @@ class SVGAAnimationController extends AnimationController {
   }
 }
 
-class _SVGAImageState extends State<SVGAImage> {
-  MovieEntity? video;
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
+  late SVGAAnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    video = widget.controller.videoItem;
-    widget.controller.addListener(_handleChange);
-  }
-
-  void _handleChange() {
-    if (mounted) {
-      setState(() {
-        video = widget.controller.videoItem;
-      });
-    }
+    _controller = SVGAAnimationController(vsync: this);
+    _controller.loadAnimation("assets/animation.svga");
   }
 
   @override
   void dispose() {
-    widget.controller.removeListener(_handleChange);
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (video == null) return const SizedBox.shrink();
-
-    return IgnorePointer(
-      child: CustomPaint(
-        painter: _SVGAPainter(widget.controller),
-        size: Size(video!.params.viewBoxWidth, video!.params.viewBoxHeight),
+    return MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: SVGAImage(_controller),
+        ),
       ),
     );
   }
-}
-
-class _SVGAPainter extends CustomPainter {
-  final SVGAAnimationController controller;
-
-  _SVGAPainter(this.controller);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // إضافة منطق الرسم هنا
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
