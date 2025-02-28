@@ -50,31 +50,38 @@ class SVGAAnimationController extends AnimationController {
 
 class _SVGAImageState extends State<SVGAImage> with SingleTickerProviderStateMixin {
   late SVGAAnimationController _animationController;
-  late SVGAParser _parser;
+  final SVGAParser _parser = SVGAParser();
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   @override
   void initState() {
     super.initState();
-    _parser = SVGAParser();
     _animationController = SVGAAnimationController(vsync: this);
     _loadAnimation();
     _playAudio();
   }
 
   void _loadAnimation() async {
-    final videoItem = await _parser.decodeFromAssets(widget.assetName);
-    if (mounted) {
-      setState(() {
-        _animationController.videoItem = videoItem;
-      });
-      _animationController.repeat();
+    try {
+      final videoItem = await _parser.decodeFromAssets(widget.assetName);
+      if (mounted) {
+        setState(() {
+          _animationController.videoItem = videoItem;
+        });
+        _animationController.repeat();
+      }
+    } catch (e) {
+      print("Error loading SVGA: $e");
     }
   }
 
   void _playAudio() async {
-    await _audioPlayer.setSource(AssetSource('audio/sound.mp3'));
-    _audioPlayer.resume();
+    try {
+      await _audioPlayer.setSource(AssetSource('audio/sound.mp3'));
+      _audioPlayer.resume();
+    } catch (e) {
+      print("Error playing audio: $e");
+    }
   }
 
   @override
@@ -90,7 +97,9 @@ class _SVGAImageState extends State<SVGAImage> with SingleTickerProviderStateMix
       child: SizedBox(
         width: 200,
         height: 200,
-        child: SVGASimpleImage(controller: _animationController),
+        child: _animationController.videoItem != null
+            ? SVGASimpleImage(controller: _animationController)
+            : CircularProgressIndicator(),
       ),
     );
   }
