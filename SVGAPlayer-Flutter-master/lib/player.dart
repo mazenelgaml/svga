@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:svgaplayer_flutter/proto/svga.pb.dart';
 import 'package:svgaplayer_flutter/parser.dart';
 import 'package:svgaplayer_flutter/svgaplayer.dart';
+import 'package:svgaplayer_flutter/painter.dart';
 
 class SVGAImage extends StatefulWidget {
   final SVGAAnimationController controller;
