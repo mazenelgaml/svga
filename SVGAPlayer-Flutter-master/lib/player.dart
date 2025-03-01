@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:svgaplayer_flutter/proto/svga.pb.dart';
 import 'package:svgaplayer_flutter/parser.dart';
+import 'package:svgaplayer_flutter/player.dart';
 
 class SVGAAnimationController extends AnimationController {
   MovieEntity? _videoItem;
@@ -26,6 +27,7 @@ class SVGAAnimationController extends AnimationController {
     if (value != null) {
       int fps = value.params.fps > 0 ? value.params.fps : 20;
       duration = Duration(milliseconds: (value.params.frames / fps * 1000).toInt());
+      forward(from: 0.0);
     } else {
       duration = Duration.zero;
     }
@@ -44,7 +46,9 @@ class SVGAAnimationController extends AnimationController {
 
 class SVGAImage extends StatefulWidget {
   final SVGAAnimationController controller;
-  const SVGAImage(this.controller, {Key? key}) : super(key: key);
+  final String assetPath;
+  
+  const SVGAImage({Key? key, required this.controller, required this.assetPath}) : super(key: key);
 
   @override
   _SVGAImageState createState() => _SVGAImageState();
@@ -52,13 +56,14 @@ class SVGAImage extends StatefulWidget {
 
 class _SVGAImageState extends State<SVGAImage> {
   MovieEntity? video;
+  SVGAParser parser = SVGAParser();
   AudioPlayer? _audioPlayer;
   bool _isAudioPlaying = false;
 
   @override
   void initState() {
     super.initState();
-    video = widget.controller.videoItem;
+    _loadAnimation();
     widget.controller.onUpdate = _handleChange;
     widget.controller.addListener(_handleChange);
     widget.controller.addStatusListener((status) {
@@ -68,12 +73,25 @@ class _SVGAImageState extends State<SVGAImage> {
     });
   }
 
+  Future<void> _loadAnimation() async {
+    parser.decodeFromAssets(widget.assetPath, onSuccess: (movie) {
+      if (mounted) {
+        setState(() {
+          video = movie;
+          widget.controller.videoItem = movie;
+        });
+        _playAudio();
+      }
+    });
+  }
+
   void _handleChange() {
     if (mounted) {
-      setState(() {
-        video = widget.controller.videoItem;
-      });
+      setState(() {});
     }
+  }
+
+  void _playAudio() {
     if (video?.audiosData.isNotEmpty == true && !_isAudioPlaying) {
       _audioPlayer = AudioPlayer();
       final audioKey = video!.audiosData.keys.first;
@@ -100,29 +118,9 @@ class _SVGAImageState extends State<SVGAImage> {
       child: AnimatedBuilder(
         animation: widget.controller,
         builder: (_, __) {
-          return CustomPaint(
-            painter: _SVGAPainter(video!, widget.controller.value),
-            size: Size(video!.params.viewBoxWidth, video!.params.viewBoxHeight),
-          );
+          return SVGASimpleImage(video!);
         },
       ),
     );
-  }
-}
-
-class _SVGAPainter extends CustomPainter {
-  final MovieEntity video;
-  final double progress;
-  _SVGAPainter(this.video, this.progress);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.red.withOpacity(0.3);
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
   }
 }
