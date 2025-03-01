@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:svgaplayer_flutter/proto/svga.pb.dart';
 import 'package:svgaplayer_flutter/parser.dart';
+import 'package:svgaplayer_flutter/painter.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'audio_handler.dart';
 
 class SVGAImage extends StatefulWidget {
   final SVGAAnimationController controller;
@@ -17,8 +17,16 @@ class SVGAImage extends StatefulWidget {
 class SVGAAnimationController extends AnimationController {
   MovieEntity? _videoItem;
   bool _isDisposed = false;
+  VoidCallback? onUpdate;
 
-  SVGAAnimationController({required TickerProvider vsync}) : super(vsync: vsync, duration: Duration.zero);
+  SVGAAnimationController({required TickerProvider vsync})
+      : super(vsync: vsync, duration: Duration.zero) {
+    addListener(() {
+      if (!_isDisposed && onUpdate != null) {
+        onUpdate!();
+      }
+    });
+  }
 
   set videoItem(MovieEntity? value) {
     if (_isDisposed) return;
@@ -35,10 +43,6 @@ class SVGAAnimationController extends AnimationController {
 
   MovieEntity? get videoItem => _videoItem;
 
-  void clear() {
-    if (!_isDisposed) notifyListeners();
-  }
-
   @override
   void dispose() {
     _videoItem = null;
@@ -49,12 +53,20 @@ class SVGAAnimationController extends AnimationController {
 
 class _SVGAImageState extends State<SVGAImage> {
   MovieEntity? video;
+  AudioPlayer? _audioPlayer;
+  bool _isAudioPlaying = false;
 
   @override
   void initState() {
     super.initState();
     video = widget.controller.videoItem;
+    widget.controller.onUpdate = _handleChange;
     widget.controller.addListener(_handleChange);
+    widget.controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        widget.controller.repeat();
+      }
+    });
   }
 
   void _handleChange() {
@@ -63,11 +75,21 @@ class _SVGAImageState extends State<SVGAImage> {
         video = widget.controller.videoItem;
       });
     }
+
+    // تشغيل الصوت عند بداية الفيديو
+    if (video?.audiosData.isNotEmpty == true && !_isAudioPlaying) {
+      _audioPlayer = AudioPlayer();
+      final audioKey = video!.audiosData.keys.first;
+      final audioData = video!.audiosData[audioKey];
+      _audioPlayer!.play(BytesSource(audioData!));
+      _isAudioPlaying = true;
+    }
   }
 
   @override
   void dispose() {
     widget.controller.removeListener(_handleChange);
+    _audioPlayer?.dispose();
     super.dispose();
   }
 
@@ -76,24 +98,16 @@ class _SVGAImageState extends State<SVGAImage> {
     if (video == null) return const SizedBox.shrink();
 
     return IgnorePointer(
-      child: CustomPaint(
-        painter: _SVGAPainter(widget.controller),
-        size: Size(video!.params.viewBoxWidth, video!.params.viewBoxHeight),
+      child: AnimatedBuilder(
+        animation: widget.controller,
+        builder: (_, __) {
+          return CustomPaint(
+            painter: _SVGAPainter(video!, widget.controller.value),
+            size: Size(video!.params.viewBoxWidth, video!.params.viewBoxHeight),
+          );
+        },
       ),
     );
   }
 }
 
-class _SVGAPainter extends CustomPainter {
-  final SVGAAnimationController controller;
-
-  _SVGAPainter(this.controller);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // إضافة منطق الرسم هنا
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
