@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:svgaplayer_flutter/proto/svga.pb.dart';
 import 'package:svgaplayer_flutter/parser.dart';
-import 'package:svgaplayer_flutter/painter.dart';
+import 'package:flutter/painting.dart' show decodeImageFromList;
 import 'package:audioplayers/audioplayers.dart';
 
 class SVGAImage extends StatefulWidget {
