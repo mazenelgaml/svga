@@ -129,18 +129,3 @@ class _SVGAImageState extends State<SVGAImage> {
     );
   }
 }
-
-class _SVGAPainter extends CustomPainter {
-  final MovieEntity video;
-  final double progress;
-
-  _SVGAPainter(this.video, this.progress);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // إضافة منطق الرسم هنا لاحقًا
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
