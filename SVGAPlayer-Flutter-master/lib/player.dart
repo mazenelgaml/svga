@@ -101,8 +101,12 @@ class _SVGAPainter extends CustomPainter {
       if (frameIndex < sprite.frames.length) {
         final drawFrame = sprite.frames[frameIndex];
 
-        if (drawFrame.hasBitmap()) {  // ✅ التحقق من وجود الصورة
-          _decodeAndDrawImage(canvas, drawFrame.bitmap);
+        // ✅ التأكد من وجود الصورة من خلال imageKey
+        if (drawFrame.hasImageKey()) {  
+          final key = drawFrame.imageKey;
+          if (controller.videoItem!.images.containsKey(key)) {
+            _decodeAndDrawImage(canvas, controller.videoItem!.images[key]!);
+          }
         }
       }
     }
@@ -111,9 +115,10 @@ class _SVGAPainter extends CustomPainter {
   void _decodeAndDrawImage(Canvas canvas, Uint8List bitmap) async {
     final codec = await ui.instantiateImageCodec(bitmap);
     final frame = await codec.getNextFrame();
-    canvas.drawImage(frame.image, Offset.zero, Paint()); // ✅ إصلاح الرسم
+    canvas.drawImage(frame.image, Offset.zero, Paint());
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
+
