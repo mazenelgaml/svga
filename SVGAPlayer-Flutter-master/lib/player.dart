@@ -1,9 +1,6 @@
-// svga_player.dart
-
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart' show decodeImageFromList;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:svgaplayer_flutter/proto/svga.pb.dart';
 import 'package:svgaplayer_flutter/parser.dart';
@@ -97,7 +94,7 @@ class _SVGAImageState extends State<SVGAImage> {
 
   @override
   Widget build(BuildContext context) {
-    if (video == null) return const SizedBox.shrink();
+    if (video == null) return Center(child: CircularProgressIndicator());
 
     return IgnorePointer(
       child: AnimatedBuilder(
@@ -120,7 +117,8 @@ class _SVGAPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // رسم الإطارات هنا
+    final paint = Paint()..color = Colors.red.withOpacity(0.3);
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
   }
 
   @override
