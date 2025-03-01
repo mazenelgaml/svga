@@ -4,7 +4,7 @@ import 'package:svgaplayer_flutter/proto/svga.pb.dart';
 import 'package:svgaplayer_flutter/parser.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'audio_handler.dart';
-part of svgaplayer_flutter_player;
+
 
 class SVGAImage extends StatefulWidget {
   final SVGAAnimationController controller;
