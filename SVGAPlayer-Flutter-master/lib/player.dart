@@ -4,6 +4,7 @@ import 'package:svgaplayer_flutter/proto/svga.pb.dart';
 import 'package:svgaplayer_flutter/parser.dart';
 import 'package:flutter/painting.dart' show decodeImageFromList;
 import 'package:audioplayers/audioplayers.dart';
+import 'dart:ui' as ui;
 
 class SVGAImage extends StatefulWidget {
   final SVGAAnimationController controller;
@@ -67,6 +68,7 @@ class _SVGAImageState extends State<SVGAImage> {
         widget.controller.repeat();
       }
     });
+    _loadFrames();
   }
 
   void _handleChange() {
@@ -76,6 +78,12 @@ class _SVGAImageState extends State<SVGAImage> {
       });
     }
 
+    if (video == null) return;
+
+    if (video!.images.isNotEmpty && video!.bitmapCache.isEmpty) {
+      _loadFrames();
+    }
+
     // تشغيل الصوت عند بداية الفيديو
     if (video?.audiosData.isNotEmpty == true && !_isAudioPlaying) {
       _audioPlayer = AudioPlayer();
@@ -83,6 +91,20 @@ class _SVGAImageState extends State<SVGAImage> {
       final audioData = video!.audiosData[audioKey];
       _audioPlayer!.play(BytesSource(audioData!));
       _isAudioPlaying = true;
+    }
+  }
+
+  Future<void> _loadFrames() async {
+    if (video == null) return;
+
+    for (var key in video!.images.keys) {
+      final bytes = video!.images[key];
+      if (bytes != null) {
+        decodeImageFromList(bytes, (image) {
+          video!.bitmapCache[key] = image;
+          setState(() {}); // تحديث الواجهة بعد تحميل الصور
+        });
+      }
     }
   }
 
@@ -111,3 +133,31 @@ class _SVGAImageState extends State<SVGAImage> {
   }
 }
 
+class _SVGAPainter extends CustomPainter {
+  final MovieEntity video;
+  final double progress;
+
+  _SVGAPainter(this.video, this.progress);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (video.bitmapCache.isEmpty) return;
+
+    int totalFrames = video.params.frames;
+    int currentFrame = (progress * totalFrames).toInt().clamp(0, totalFrames - 1);
+
+    final frameKey = video.images.keys.elementAt(currentFrame);
+    final frameImage = video.bitmapCache[frameKey];
+
+    if (frameImage != null) {
+      paintImage(
+        canvas: canvas,
+        rect: Rect.fromLTWH(0, 0, size.width, size.height),
+        image: frameImage,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
