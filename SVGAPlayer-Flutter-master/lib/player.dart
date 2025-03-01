@@ -57,6 +57,7 @@ class _SVGAImageState extends State<SVGAImage> {
   MovieEntity? video;
   AudioPlayer? _audioPlayer;
   bool _isAudioPlaying = false;
+  bool _isMuted = false;
 
   @override
   void initState() {
@@ -89,21 +90,21 @@ class _SVGAImageState extends State<SVGAImage> {
     }
   }
 
-  Future<void> _loadFrames() async {
-    if (video == null) return;
-    for (var key in video!.images.keys) {
-      final bytes = video!.images[key];
-      if (bytes != null) {
-        decodeImageFromList(Uint8List.fromList(bytes)).then((image) {
-          video!.bitmapCache[key] = image;
-          if (mounted) {
-            setState(() {});
-          }
-        }).catchError((e) {
-          debugPrint("خطأ في تحميل الإطار: $e");
-        });
-      }
+  void _togglePlayPause() {
+    if (widget.controller.isAnimating) {
+      widget.controller.stop();
+      _audioPlayer?.pause();
+    } else {
+      widget.controller.repeat();
+      _audioPlayer?.resume();
     }
+  }
+
+  void _toggleMute() {
+    setState(() {
+      _isMuted = !_isMuted;
+      _audioPlayer?.setVolume(_isMuted ? 0 : 1);
+    });
   }
 
   @override
@@ -117,16 +118,50 @@ class _SVGAImageState extends State<SVGAImage> {
   Widget build(BuildContext context) {
     if (video == null) return const SizedBox.shrink();
 
-    return IgnorePointer(
-      child: AnimatedBuilder(
-        animation: widget.controller,
-        builder: (_, __) {
-          return CustomPaint(
-            painter: _SVGAPainter(video!, widget.controller.value),
-            size: Size(video!.params.viewBoxWidth, video!.params.viewBoxHeight),
-          );
-        },
-      ),
+    return Column(
+      children: [
+        IgnorePointer(
+          child: AnimatedBuilder(
+            animation: widget.controller,
+            builder: (_, __) {
+              return CustomPaint(
+                painter: _SVGAPainter(video!, widget.controller.value),
+                size: Size(video!.params.viewBoxWidth, video!.params.viewBoxHeight),
+              );
+            },
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              icon: Icon(widget.controller.isAnimating ? Icons.pause : Icons.play_arrow),
+              onPressed: _togglePlayPause,
+            ),
+            IconButton(
+              icon: Icon(_isMuted ? Icons.volume_off : Icons.volume_up),
+              onPressed: _toggleMute,
+            ),
+          ],
+        ),
+      ],
     );
+  }
+}
+
+class _SVGAPainter extends CustomPainter {
+  final MovieEntity video;
+  final double progress;
+
+  _SVGAPainter(this.video, this.progress);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Implement the actual SVGA drawing logic here
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
   }
 }
