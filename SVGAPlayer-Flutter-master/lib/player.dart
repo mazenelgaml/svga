@@ -4,7 +4,8 @@ import 'package:svgaplayer_flutter/proto/svga.pb.dart';
 import 'package:svgaplayer_flutter/parser.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'audio_handler.dart';
-
+import 'dart:typed_data'; // Add this import
+import 'package:flutter_svg/flutter_svg.dart'; // Add this import
 
 class SVGAImage extends StatefulWidget {
   final SVGAAnimationController controller;
@@ -18,8 +19,12 @@ class SVGAImage extends StatefulWidget {
 class SVGAAnimationController extends AnimationController {
   MovieEntity? _videoItem;
   bool _isDisposed = false;
+  int _currentFrame = 0; // Add this line
+  bool _canvasNeedsClear = false; // Add this line
 
   SVGAAnimationController({required TickerProvider vsync}) : super(vsync: vsync, duration: Duration.zero);
+
+  int get currentFrame => _currentFrame; // Add this getter
 
   set videoItem(MovieEntity? value) {
     if (_isDisposed) return;
@@ -37,6 +42,7 @@ class SVGAAnimationController extends AnimationController {
   MovieEntity? get videoItem => _videoItem;
 
   void clear() {
+    _canvasNeedsClear = true; // Add this line
     if (!_isDisposed) notifyListeners();
   }
 
@@ -84,8 +90,6 @@ class _SVGAImageState extends State<SVGAImage> {
     );
   }
 }
-
-
 
 class _SVGAPainter extends CustomPainter {
   final BoxFit fit;
