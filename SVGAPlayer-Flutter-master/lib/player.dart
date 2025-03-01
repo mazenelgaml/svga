@@ -5,6 +5,7 @@ import 'package:svgaplayer_flutter/parser.dart';
 import 'package:flutter/painting.dart' show decodeImageFromList;
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:typed_data';
+import 'package:flutter/painting.dart';
 
 class SVGAImage extends StatefulWidget {
   final SVGAAnimationController controller;
