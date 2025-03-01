@@ -1,9 +1,9 @@
-import 'dart:ui' as ui;
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:svgaplayer_flutter/proto/svga.pb.dart';
 import 'package:svgaplayer_flutter/parser.dart';
-import 'package:svgaplayer_flutter/player.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'audio_handler.dart';
 
 class SVGAImage extends StatefulWidget {
   final SVGAAnimationController controller;
@@ -18,27 +18,26 @@ class SVGAAnimationController extends AnimationController {
   MovieEntity? _videoItem;
   bool _isDisposed = false;
 
-  SVGAAnimationController({required TickerProvider vsync})
-      : super(vsync: vsync, duration: Duration.zero);
+  SVGAAnimationController({required TickerProvider vsync}) : super(vsync: vsync, duration: Duration.zero);
 
   set videoItem(MovieEntity? value) {
     if (_isDisposed) return;
     if (isAnimating) stop();
     _videoItem = value;
-
     if (value != null) {
       int fps = value.params.fps > 0 ? value.params.fps : 20;
       duration = Duration(milliseconds: (value.params.frames / fps * 1000).toInt());
-      reset();
-      forward();
     } else {
       duration = Duration.zero;
     }
-
-    notifyListeners();
+    reset();
   }
 
   MovieEntity? get videoItem => _videoItem;
+
+  void clear() {
+    if (!_isDisposed) notifyListeners();
+  }
 
   @override
   void dispose() {
@@ -88,37 +87,13 @@ class _SVGAImageState extends State<SVGAImage> {
 class _SVGAPainter extends CustomPainter {
   final SVGAAnimationController controller;
 
-  _SVGAPainter(this.controller) : super(repaint: controller);
+  _SVGAPainter(this.controller);
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (controller.videoItem == null) return;
-
-    final frameIndex = (controller.value * (controller.videoItem!.params.frames - 1)).toInt();
-    final frame = controller.videoItem!.sprites;
-
-    for (var sprite in frame) {
-      if (frameIndex < sprite.frames.length) {
-        final drawFrame = sprite.frames[frameIndex];
-
-        // ✅ التأكد من وجود الصورة من خلال imageKey
-        if (drawFrame.hasImageKey()) {  
-          final key = drawFrame.imageKey;
-          if (controller.videoItem!.images.containsKey(key)) {
-            _decodeAndDrawImage(canvas, controller.videoItem!.images[key]!);
-          }
-        }
-      }
-    }
-  }
-
-  void _decodeAndDrawImage(Canvas canvas, Uint8List bitmap) async {
-    final codec = await ui.instantiateImageCodec(bitmap);
-    final frame = await codec.getNextFrame();
-    canvas.drawImage(frame.image, Offset.zero, Paint());
+    // إضافة منطق الرسم هنا
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
-
