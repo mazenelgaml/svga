@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:svgaplayer_flutter/proto/svga.pb.dart';
 import 'package:svgaplayer_flutter/parser.dart';
-import 'package:svgaplayer_flutter/svgaplayer.dart';
 import 'dart:ui' as ui;
 
 class SVGAImage extends StatefulWidget {
@@ -100,17 +99,19 @@ class _SVGAPainter extends CustomPainter {
     for (final sprite in video.sprites) {
       if (sprite.frames.isEmpty || sprite.frames.length <= currentFrame) continue;
       final frame = sprite.frames[currentFrame];
-      if (frame.image == null) continue;
+      final imageKey = sprite.imageKey;
+      final bitmap = video.dynamicItem.dynamicImages[imageKey] ?? video.bitmapCache[imageKey];
+      if (bitmap == null) continue;
       final paint = Paint();
       
       canvas.drawImageRect(
-        frame.image! as ui.Image,
-        Rect.fromLTWH(0, 0, frame.image!.width.toDouble(), frame.image!.height.toDouble()),
+        bitmap,
+        Rect.fromLTWH(0, 0, bitmap.width.toDouble(), bitmap.height.toDouble()),
         Rect.fromLTWH(
-          sprite.layout.x,
-          sprite.layout.y,
-          sprite.layout.width,
-          sprite.layout.height,
+          frame.layout.x,
+          frame.layout.y,
+          frame.layout.width,
+          frame.layout.height,
         ),
         paint,
       );
