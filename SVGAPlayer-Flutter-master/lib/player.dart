@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:svgaplayer_flutter/proto/svga.pb.dart';
 import 'package:svgaplayer_flutter/parser.dart';
-import 'package:svgaplayer_flutter/painter.dart';
-import 'package:audioplayers/audioplayers.dart';
-import 'audio_handler.dart';
-import 'dart:typed_data'; // Add this import
-
+import 'package:svgaplayer_flutter/svgaplayer.dart';
 
 class SVGAImage extends StatefulWidget {
   final SVGAAnimationController controller;
@@ -20,12 +15,8 @@ class SVGAImage extends StatefulWidget {
 class SVGAAnimationController extends AnimationController {
   MovieEntity? _videoItem;
   bool _isDisposed = false;
-  int _currentFrame = 0; // Add this line
-  bool _canvasNeedsClear = false; // Add this line
 
   SVGAAnimationController({required TickerProvider vsync}) : super(vsync: vsync, duration: Duration.zero);
-
-  int get currentFrame => _currentFrame; // Add this getter
 
   set videoItem(MovieEntity? value) {
     if (_isDisposed) return;
@@ -43,7 +34,6 @@ class SVGAAnimationController extends AnimationController {
   MovieEntity? get videoItem => _videoItem;
 
   void clear() {
-    _canvasNeedsClear = true; // Add this line
     if (!_isDisposed) notifyListeners();
   }
 
@@ -92,3 +82,40 @@ class _SVGAImageState extends State<SVGAImage> {
   }
 }
 
+class _SVGAPainter extends CustomPainter {
+  final SVGAAnimationController controller;
+
+  _SVGAPainter(this.controller) : super(repaint: controller);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (controller.videoItem == null) return;
+    
+    final MovieEntity video = controller.videoItem!;
+    final int currentFrame = (controller.value * video.params.frames).toInt();
+    
+    if (currentFrame >= video.sprites.length) return;
+    
+    for (final sprite in video.sprites) {
+      if (sprite.frames.isEmpty) continue;
+      final frameIndex = currentFrame % sprite.frames.length;
+      final frame = sprite.frames[frameIndex];
+      final paint = Paint();
+      
+      canvas.drawImageRect(
+        frame.image!,
+        Rect.fromLTWH(0, 0, frame.image!.width.toDouble(), frame.image!.height.toDouble()),
+        Rect.fromLTWH(
+          sprite.layout.x,
+          sprite.layout.y,
+          sprite.layout.width,
+          sprite.layout.height,
+        ),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
