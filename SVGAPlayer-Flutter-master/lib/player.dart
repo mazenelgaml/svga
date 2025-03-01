@@ -119,31 +119,9 @@ class _SVGAImageWidgetState extends State<SVGAImageWidget> {
       child: AnimatedBuilder(
         animation: widget.controller,
         builder: (_, __) {
-          return video != null
-              ? SVGASimpleImage(video!)
-              : CustomPaint(
-                  painter: _SVGAPainter(video!, widget.controller.value),
-                  size: Size(video!.params.viewBoxWidth, video!.params.viewBoxHeight),
-                );
+          return SVGAImage(controller: widget.controller);
         },
       ),
     );
-  }
-}
-
-class _SVGAPainter extends CustomPainter {
-  final MovieEntity video;
-  final double progress;
-  _SVGAPainter(this.video, this.progress);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.red.withOpacity(0.3);
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
   }
 }
