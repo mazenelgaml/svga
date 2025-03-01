@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:svgaplayer_flutter/proto/svga.pb.dart';
 import 'package:svgaplayer_flutter/parser.dart';
 import 'package:svgaplayer_flutter/svgaplayer.dart';
-import 'package:svgaplayer_flutter/painter.dart';
+import 'dart:ui' as ui;
 
 class SVGAImage extends StatefulWidget {
   final SVGAAnimationController controller;
@@ -30,6 +30,7 @@ class SVGAAnimationController extends AnimationController {
       duration = Duration.zero;
     }
     reset();
+    notifyListeners(); // 🔥 تأكد من تحديث الرسوم عند تغيير الفيديو
   }
 
   MovieEntity? get videoItem => _videoItem;
@@ -91,20 +92,19 @@ class _SVGAPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (controller.videoItem == null) return;
-    
     final MovieEntity video = controller.videoItem!;
     final int currentFrame = (controller.value * video.params.frames).toInt();
     
     if (currentFrame >= video.sprites.length) return;
     
     for (final sprite in video.sprites) {
-      if (sprite.frames.isEmpty) continue;
-      final frameIndex = currentFrame % sprite.frames.length;
-      final frame = sprite.frames[frameIndex];
+      if (sprite.frames.isEmpty || sprite.frames.length <= currentFrame) continue;
+      final frame = sprite.frames[currentFrame];
+      if (frame.image == null) continue;
       final paint = Paint();
       
       canvas.drawImageRect(
-        frame.image!,
+        frame.image! as ui.Image,
         Rect.fromLTWH(0, 0, frame.image!.width.toDouble(), frame.image!.height.toDouble()),
         Rect.fromLTWH(
           sprite.layout.x,
@@ -118,5 +118,7 @@ class _SVGAPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _SVGAPainter oldDelegate) {
+    return oldDelegate.controller.value != controller.value;
+  }
 }
