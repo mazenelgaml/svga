@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:svgaplayer_flutter/proto/svga.pb.dart';
 import 'package:svgaplayer_flutter/parser.dart';
+import 'package:svgaplayer_flutter/player.dart';
 
 class SVGAImage extends StatefulWidget {
   final SVGAAnimationController controller;
@@ -97,48 +98,17 @@ class _SVGAPainter extends CustomPainter {
     for (var sprite in frame) {
       if (frameIndex < sprite.frames.length) {
         final drawFrame = sprite.frames[frameIndex];
-        canvas.drawImage(drawFrame.bitmap, Offset.zero, Paint()); // Draw frame
+
+        if (drawFrame.imageKey.isNotEmpty) {
+          final image = controller.videoItem!.images[drawFrame.imageKey];
+          if (image != null) {
+            canvas.drawImage(image, Offset.zero, Paint()); // ✅ Fixed Image Rendering
+          }
+        }
       }
     }
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
-  late SVGAAnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = SVGAAnimationController(vsync: this);
-    _loadSVGAAnimation();
-  }
-
-  Future<void> _loadSVGAAnimation() async {
-    final parser = SVGAParser();
-    final videoItem = await parser.decodeFromAssets('assets/animation.svga');
-    _controller.videoItem = videoItem;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: SVGAImage(_controller),
-        ),
-      ),
-    );
-  }
 }
