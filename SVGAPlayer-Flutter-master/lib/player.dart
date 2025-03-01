@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:svgaplayer_flutter/proto/svga.pb.dart';
 import 'package:svgaplayer_flutter/parser.dart';
@@ -28,12 +30,12 @@ class SVGAAnimationController extends AnimationController {
       int fps = value.params.fps > 0 ? value.params.fps : 20;
       duration = Duration(milliseconds: (value.params.frames / fps * 1000).toInt());
       reset();
-      forward(); // Ensure animation starts playing
+      forward();
     } else {
       duration = Duration.zero;
     }
 
-    notifyListeners(); // Important to trigger UI update
+    notifyListeners();
   }
 
   MovieEntity? get videoItem => _videoItem;
@@ -99,14 +101,17 @@ class _SVGAPainter extends CustomPainter {
       if (frameIndex < sprite.frames.length) {
         final drawFrame = sprite.frames[frameIndex];
 
-        if (drawFrame.imageKey.isNotEmpty) {
-          final image = controller.videoItem!.images[drawFrame.imageKey];
-          if (image != null) {
-            canvas.drawImage(image, Offset.zero, Paint()); // ✅ Fixed Image Rendering
-          }
+        if (drawFrame.hasBitmap()) {  // ✅ التحقق من وجود الصورة
+          _decodeAndDrawImage(canvas, drawFrame.bitmap);
         }
       }
     }
+  }
+
+  void _decodeAndDrawImage(Canvas canvas, Uint8List bitmap) async {
+    final codec = await ui.instantiateImageCodec(bitmap);
+    final frame = await codec.getNextFrame();
+    canvas.drawImage(frame.image, Offset.zero, Paint()); // ✅ إصلاح الرسم
   }
 
   @override
