@@ -4,7 +4,7 @@ import 'package:svgaplayer_flutter/proto/svga.pb.dart';
 import 'package:svgaplayer_flutter/parser.dart';
 import 'package:flutter/painting.dart' show decodeImageFromList;
 import 'package:audioplayers/audioplayers.dart';
-import 'dart:ui' as ui;
+import 'dart:typed_data';
 
 class SVGAImage extends StatefulWidget {
   final SVGAAnimationController controller;
@@ -68,7 +68,6 @@ class _SVGAImageState extends State<SVGAImage> {
         widget.controller.repeat();
       }
     });
-    _loadFrames();
   }
 
   void _handleChange() {
@@ -78,31 +77,29 @@ class _SVGAImageState extends State<SVGAImage> {
       });
     }
 
-    if (video == null) return;
-
-    if (video!.images.isNotEmpty && video!.bitmapCache.isEmpty) {
-      _loadFrames();
-    }
-
-    // تشغيل الصوت عند بداية الفيديو
     if (video?.audiosData.isNotEmpty == true && !_isAudioPlaying) {
       _audioPlayer = AudioPlayer();
       final audioKey = video!.audiosData.keys.first;
       final audioData = video!.audiosData[audioKey];
-      _audioPlayer!.play(BytesSource(audioData!));
-      _isAudioPlaying = true;
+      if (audioData != null) {
+        _audioPlayer!.play(BytesSource(audioData));
+        _isAudioPlaying = true;
+      }
     }
   }
 
   Future<void> _loadFrames() async {
     if (video == null) return;
-
     for (var key in video!.images.keys) {
       final bytes = video!.images[key];
       if (bytes != null) {
-        decodeImageFromList(bytes, (image) {
+        decodeImageFromList(Uint8List.fromList(bytes)).then((image) {
           video!.bitmapCache[key] = image;
-          setState(() {}); // تحديث الواجهة بعد تحميل الصور
+          if (mounted) {
+            setState(() {});
+          }
+        }).catchError((e) {
+          debugPrint("خطأ في تحميل الإطار: $e");
         });
       }
     }
@@ -141,21 +138,7 @@ class _SVGAPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (video.bitmapCache.isEmpty) return;
-
-    int totalFrames = video.params.frames;
-    int currentFrame = (progress * totalFrames).toInt().clamp(0, totalFrames - 1);
-
-    final frameKey = video.images.keys.elementAt(currentFrame);
-    final frameImage = video.bitmapCache[frameKey];
-
-    if (frameImage != null) {
-      paintImage(
-        canvas: canvas,
-        rect: Rect.fromLTWH(0, 0, size.width, size.height),
-        image: frameImage,
-      );
-    }
+    // إضافة منطق الرسم هنا لاحقًا
   }
 
   @override
