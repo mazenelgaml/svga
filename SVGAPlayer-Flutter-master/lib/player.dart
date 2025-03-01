@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:svgaplayer_flutter/proto/svga.pb.dart';
@@ -44,17 +43,17 @@ class SVGAAnimationController extends AnimationController {
   }
 }
 
-class SVGAImage extends StatefulWidget {
+class SVGAImageWidget extends StatefulWidget {
   final SVGAAnimationController controller;
   final String assetPath;
-  
-  const SVGAImage({Key? key, required this.controller, required this.assetPath}) : super(key: key);
+
+  const SVGAImageWidget({Key? key, required this.controller, required this.assetPath}) : super(key: key);
 
   @override
-  _SVGAImageState createState() => _SVGAImageState();
+  _SVGAImageWidgetState createState() => _SVGAImageWidgetState();
 }
 
-class _SVGAImageState extends State<SVGAImage> {
+class _SVGAImageWidgetState extends State<SVGAImageWidget> {
   MovieEntity? video;
   SVGAParser parser = SVGAParser();
   AudioPlayer? _audioPlayer;
@@ -74,7 +73,8 @@ class _SVGAImageState extends State<SVGAImage> {
   }
 
   Future<void> _loadAnimation() async {
-    parser.decodeFromAssets(widget.assetPath, onSuccess: (movie) {
+    try {
+      final movie = await parser.decodeFromAssets(widget.assetPath);
       if (mounted) {
         setState(() {
           video = movie;
@@ -82,7 +82,9 @@ class _SVGAImageState extends State<SVGAImage> {
         });
         _playAudio();
       }
-    });
+    } catch (e) {
+      print("خطأ أثناء تحميل SVGA: $e");
+    }
   }
 
   void _handleChange() {
@@ -118,7 +120,7 @@ class _SVGAImageState extends State<SVGAImage> {
       child: AnimatedBuilder(
         animation: widget.controller,
         builder: (_, __) {
-          return SVGASimpleImage(video!);
+          return SVGAImage(controller: widget.controller, assetPath: widget.assetPath);
         },
       ),
     );
