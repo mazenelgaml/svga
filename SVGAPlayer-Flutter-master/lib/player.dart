@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 class SVGAImage extends StatelessWidget {
   final SVGAAnimationController controller;
 
+  // The controller is passed from the parent widget, preventing duplication.
   const SVGAImage({Key? key, required this.controller}) : super(key: key);
 
   @override
@@ -79,7 +80,7 @@ class SVGAAnimationController extends AnimationController {
       duration = Duration.zero;
     }
     reset();
-    notifyListeners(); // 🔥 تأكد من تحديث الرسوم عند تغيير الفيديو
+    notifyListeners(); // 🔥 Ensure the animation updates when the video changes
   }
 
   MovieEntity? get videoItem => _videoItem;
@@ -93,6 +94,18 @@ class SVGAAnimationController extends AnimationController {
     _videoItem = null;
     _isDisposed = true;
     super.dispose();
+  }
+
+  // Add logic to restart the animation when it finishes and ensure it loops
+  void startLooping() {
+    // This listener checks if the animation has completed (value >= 1.0) and then resets and restarts it
+    addListener(() {
+      if (value >= 1.0) {
+        reset(); // Reset the animation to the beginning
+        forward(); // Restart the animation
+      }
+    });
+    forward(); // Start the animation immediately
   }
 }
 
@@ -109,12 +122,17 @@ class _SVGAAnimationPageState extends State<SVGAAnimationPage> with TickerProvid
   @override
   void initState() {
     super.initState();
-    // Create the controller once
+    // The controller is created here once. It's passed down to the SVGAImage widget.
+    // The controller is not recreated, thus preventing duplication.
     controller = SVGAAnimationController(vsync: this);
+    
+    // Start the animation loop automatically once the controller is ready
+    controller.startLooping();
   }
 
   @override
   void dispose() {
+    // Proper cleanup of the controller to avoid memory leaks
     controller.dispose();
     super.dispose();
   }
@@ -123,7 +141,8 @@ class _SVGAAnimationPageState extends State<SVGAAnimationPage> with TickerProvid
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: SVGAImage(controller: controller), // Pass the controller to SVGAImage
+        // The controller is passed down to SVGAImage, and it's reused, not duplicated
+        child: SVGAImage(controller: controller), 
       ),
     );
   }
