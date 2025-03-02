@@ -39,6 +39,7 @@ class SVGAAnimationController extends AnimationController {
     if (value != null) {
       int fps = value.params.fps > 0 ? value.params.fps : 20;
       duration = Duration(milliseconds: (value.params.frames / fps * 1000).toInt());
+      print("🎬 SVGA Loaded: ${value.params.frames} frames at $fps FPS");
       await _prepareAudio(value);
     } else {
       duration = Duration.zero;
