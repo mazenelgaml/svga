@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:svgaplayer_flutter/proto/svga.pb.dart';
-import 'package:svgaplayer_flutter/parser.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'dart:ui' as ui;
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
@@ -46,7 +44,7 @@ class SVGAAnimationController extends AnimationController {
     }
     reset();
     notifyListeners();
-    startLooping(); // Ensure looping on setting video
+    startLooping();
   }
 
   MovieEntity? get videoItem => _videoItem;
@@ -71,16 +69,21 @@ class SVGAAnimationController extends AnimationController {
       if (status == AnimationStatus.completed) {
         reset();
         forward();
-        await _playAudio();
       }
     });
-    forward();
-    _playAudio();
+
+    _audioPlayer.onPlayerComplete.listen((event) {
+      _playAudio(); // إعادة تشغيل الصوت عند الانتهاء
+    });
+
+    forward(); // بدء تشغيل الأنيميشن
+    _playAudio(); // بدء تشغيل الصوت متزامنًا مع الأنيميشن
   }
 
   Future<void> _playAudio() async {
     try {
       if (_audioFile != null && _audioFile!.existsSync()) {
+        await _audioPlayer.stop(); // إيقاف الصوت قبل إعادة تشغيله
         await _audioPlayer.seek(Duration.zero);
         await _audioPlayer.play(DeviceFileSource(_audioFile!.path));
       }
