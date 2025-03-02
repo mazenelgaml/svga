@@ -3,81 +3,19 @@ import 'package:svgaplayer_flutter/proto/svga.pb.dart';
 import 'package:svgaplayer_flutter/parser.dart';
 import 'dart:ui' as ui;
 
-class SVGAImage extends StatefulWidget {
+class SVGAImage extends StatelessWidget {
   final SVGAAnimationController controller;
 
-  const SVGAImage(this.controller, {Key? key}) : super(key: key);
-
-  @override
-  _SVGAImageState createState() => _SVGAImageState();
-}
-
-class SVGAAnimationController extends AnimationController {
-  MovieEntity? _videoItem;
-  bool _isDisposed = false;
-
-  SVGAAnimationController({required TickerProvider vsync}) : super(vsync: vsync, duration: Duration.zero);
-
-  set videoItem(MovieEntity? value) {
-    if (_isDisposed) return;
-    if (isAnimating) stop();
-    _videoItem = value;
-    if (value != null) {
-      int fps = value.params.fps > 0 ? value.params.fps : 20;
-      duration = Duration(milliseconds: (value.params.frames / fps * 1000).toInt());
-    } else {
-      duration = Duration.zero;
-    }
-    reset();
-    notifyListeners(); // 🔥 تأكد من تحديث الرسوم عند تغيير الفيديو
-  }
-
-  MovieEntity? get videoItem => _videoItem;
-
-  void clear() {
-    if (!_isDisposed) notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    _videoItem = null;
-    _isDisposed = true;
-    super.dispose();
-  }
-}
-
-class _SVGAImageState extends State<SVGAImage> {
-  MovieEntity? video;
-
-  @override
-  void initState() {
-    super.initState();
-    video = widget.controller.videoItem;
-    widget.controller.addListener(_handleChange);
-  }
-
-  void _handleChange() {
-    if (mounted) {
-      setState(() {
-        video = widget.controller.videoItem;
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    widget.controller.removeListener(_handleChange);
-    super.dispose();
-  }
+  const SVGAImage({Key? key, required this.controller}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    if (video == null) return const SizedBox.shrink();
+    if (controller.videoItem == null) return const SizedBox.shrink();
 
     return IgnorePointer(
       child: CustomPaint(
-        painter: _SVGAPainter(widget.controller),
-        size: Size(video!.params.viewBoxWidth, video!.params.viewBoxHeight),
+        painter: _SVGAPainter(controller),
+        size: Size(controller.videoItem!.params.viewBoxWidth, controller.videoItem!.params.viewBoxHeight),
       ),
     );
   }
@@ -121,5 +59,72 @@ class _SVGAPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _SVGAPainter oldDelegate) {
     return oldDelegate.controller.value != controller.value;
+  }
+}
+
+class SVGAAnimationController extends AnimationController {
+  MovieEntity? _videoItem;
+  bool _isDisposed = false;
+
+  SVGAAnimationController({required TickerProvider vsync}) : super(vsync: vsync, duration: Duration.zero);
+
+  set videoItem(MovieEntity? value) {
+    if (_isDisposed) return;
+    if (isAnimating) stop();
+    _videoItem = value;
+    if (value != null) {
+      int fps = value.params.fps > 0 ? value.params.fps : 20;
+      duration = Duration(milliseconds: (value.params.frames / fps * 1000).toInt());
+    } else {
+      duration = Duration.zero;
+    }
+    reset();
+    notifyListeners(); // 🔥 تأكد من تحديث الرسوم عند تغيير الفيديو
+  }
+
+  MovieEntity? get videoItem => _videoItem;
+
+  void clear() {
+    if (!_isDisposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _videoItem = null;
+    _isDisposed = true;
+    super.dispose();
+  }
+}
+
+class SVGAAnimationPage extends StatefulWidget {
+  const SVGAAnimationPage({Key? key}) : super(key: key);
+
+  @override
+  _SVGAAnimationPageState createState() => _SVGAAnimationPageState();
+}
+
+class _SVGAAnimationPageState extends State<SVGAAnimationPage> with TickerProviderStateMixin {
+  late SVGAAnimationController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    // Create the controller once
+    controller = SVGAAnimationController(vsync: this);
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: SVGAImage(controller: controller), // Pass the controller to SVGAImage
+      ),
+    );
   }
 }
