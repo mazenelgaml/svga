@@ -32,9 +32,9 @@ class _SVGAPainter extends CustomPainter {
     if (controller.videoItem == null) return;
     final MovieEntity video = controller.videoItem!;
     final int currentFrame = (controller.value * video.params.frames).toInt();
-    
+
     if (currentFrame >= video.sprites.length) return;
-    
+
     for (final sprite in video.sprites) {
       if (sprite.frames.isEmpty || sprite.frames.length <= currentFrame) continue;
       final frame = sprite.frames[currentFrame];
@@ -42,7 +42,7 @@ class _SVGAPainter extends CustomPainter {
       final bitmap = video.dynamicItem.dynamicImages[imageKey] ?? video.bitmapCache[imageKey];
       if (bitmap == null) continue;
       final paint = Paint();
-      
+
       canvas.drawImageRect(
         bitmap,
         Rect.fromLTWH(0, 0, bitmap.width.toDouble(), bitmap.height.toDouble()),
@@ -130,7 +130,7 @@ class _SVGAAnimationPageState extends State<SVGAAnimationPage> with TickerProvid
     // The controller is created here once. It's passed down to the SVGAImage widget.
     // The controller is not recreated, thus preventing duplication.
     controller = SVGAAnimationController(vsync: this);
-    
+
     // Start the animation loop automatically once the controller is ready
     controller.startLooping();
     controller.initializeSound(); // Make sure sound is initialized if applicable
@@ -148,7 +148,7 @@ class _SVGAAnimationPageState extends State<SVGAAnimationPage> with TickerProvid
     return Scaffold(
       body: Center(
         // The controller is passed down to SVGAImage, and it's reused, not duplicated
-        child: SVGAImage(controller: controller), 
+        child: SVGAImage(controller: controller),
       ),
     );
   }
