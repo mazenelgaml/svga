@@ -50,16 +50,17 @@ class SVGAAnimationController extends AnimationController {
   MovieEntity? get videoItem => _videoItem;
 
   Future<void> _prepareAudio(MovieEntity videoItem) async {
-    if (videoItem.audios.isEmpty) return;
-
-    final audioData = videoItem.audiosData[videoItem.audios.first.audioKey];
-    if (audioData == null) return;
-
-    final cacheDir = await getTemporaryDirectory();
-    _audioFile = File('${cacheDir.path}/temp_audio.mp3');
-
-    if (!_audioFile!.existsSync()) {
-      await _audioFile!.writeAsBytes(audioData);
+    try {
+      if (videoItem.audios.isEmpty) return;
+      final audioData = videoItem.audiosData[videoItem.audios.first.audioKey];
+      if (audioData == null) return;
+      final cacheDir = await getTemporaryDirectory();
+      _audioFile = File('${cacheDir.path}/temp_audio.mp3');
+      if (!_audioFile!.existsSync()) {
+        await _audioFile!.writeAsBytes(audioData);
+      }
+    } catch (e) {
+      print("❌ Error preparing audio: $e");
     }
   }
 
@@ -68,8 +69,7 @@ class SVGAAnimationController extends AnimationController {
       if (value >= 1.0) {
         reset();
         forward();
-        await _audioPlayer.seek(Duration.zero);
-        await _audioPlayer.resume();
+        await _playAudio();
       }
     });
     forward();
@@ -77,8 +77,12 @@ class SVGAAnimationController extends AnimationController {
   }
 
   Future<void> _playAudio() async {
-    if (_audioFile != null && _audioFile!.existsSync()) {
-      await _audioPlayer.play(DeviceFileSource(_audioFile!.path));
+    try {
+      if (_audioFile != null && _audioFile!.existsSync()) {
+        await _audioPlayer.play(DeviceFileSource(_audioFile!.path));
+      }
+    } catch (e) {
+      print("❌ Error playing audio: $e");
     }
   }
 
