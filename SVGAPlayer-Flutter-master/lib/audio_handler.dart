@@ -9,15 +9,7 @@ class AudioHandler {
   bool _isPlaying = false;
   File? _audioFile;
 
-  AudioHandler._privateConstructor();
-  static final AudioHandler _instance = AudioHandler._privateConstructor();
-  
-  factory AudioHandler() {
-    return _instance;
-  }
-
-  // Play audio from the SVGA MovieEntity, and listen for SVGA completion
-  Future<void> playAudioFromSVGA(MovieEntity videoItem, Function onFinish) async {
+  Future<void> playAudioFromSVGA(MovieEntity videoItem) async {
     if (videoItem.audios.isEmpty) return;
 
     final audioData = videoItem.audiosData[videoItem.audios.first.audioKey];
@@ -33,18 +25,13 @@ class AudioHandler {
       await _audioFile!.writeAsBytes(audioData);
     }
 
-    // Ensure the audio is played from the correct file and unmuted
-    await _player.setVolume(_isMuted ? 0 : 1);  // Set volume based on mute state
     await _player.play(DeviceFileSource(_audioFile!.path));
     _isPlaying = true;
-
-    // Trigger onFinish callback when the SVGA animation finishes
-    onFinish();
   }
 
   void muteAudio(bool mute) {
     _isMuted = mute;
-    _player.setVolume(mute ? 0 : 1); // Adjust audio volume
+    _player.setVolume(mute ? 0 : 1);
   }
 
   void pauseAudio() {
