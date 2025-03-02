@@ -9,6 +9,9 @@ class AudioHandler {
   bool _isPlaying = false;
   File? _audioFile;
 
+  /// 🔥 كول باك عند انتهاء الصوت
+  VoidCallback? onAudioComplete;
+
   Future<void> playAudioFromSVGA(MovieEntity videoItem) async {
     if (videoItem.audios.isEmpty) return;
 
@@ -28,10 +31,10 @@ class AudioHandler {
     await _player.play(DeviceFileSource(_audioFile!.path));
     _isPlaying = true;
 
-    // ✅ إعادة تشغيل الصوت تلقائيًا عند الانتهاء
+    // ✅ عند انتهاء الصوت، تشغيل SVGA
     _player.onPlayerComplete.listen((event) {
       _isPlaying = false;
-      playAudioFromSVGA(videoItem); // تشغيل الصوت من جديد
+      onAudioComplete?.call(); // نداء SVGA لإعادة التشغيل
     });
   }
 
