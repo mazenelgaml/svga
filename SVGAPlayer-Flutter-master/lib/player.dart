@@ -80,7 +80,7 @@ class SVGAAnimationController extends AnimationController {
       duration = Duration.zero;
     }
     reset();
-    notifyListeners(); // 🔥 Ensure the animation updates when the video changes
+    notifyListeners();
   }
 
   MovieEntity? get videoItem => _videoItem;
@@ -96,21 +96,20 @@ class SVGAAnimationController extends AnimationController {
     super.dispose();
   }
 
-  // Add logic to restart the animation when it finishes and ensure it loops
+  // ✅ تشغيل الأنيميشن تلقائياً عند الانتهاء
   void startLooping() {
-    addListener(() {
-      if (value >= 1.0) {
-        reset(); // Reset the animation to the beginning
-        forward(); // Restart the animation
+    addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        reset(); // إعادة تعيين الأنيميشن
+        forward(); // تشغيله مرة أخرى
       }
     });
-    forward(); // Start the animation immediately
+    forward(); // تشغيل الأنيميشن مباشرة عند الاستدعاء
   }
 
-  // Optional: Ensure sound is played properly
+  // تشغيل الصوت (لو متاح في المكتبة)
   void initializeSound() {
-    // Hypothetical property to enable sound (depends on SVGA library)
-    // audioEnabled = true;
+    // خاصية افتراضية لتفعيل الصوت حسب دعم مكتبة SVGA
   }
 }
 
@@ -127,18 +126,17 @@ class _SVGAAnimationPageState extends State<SVGAAnimationPage> with TickerProvid
   @override
   void initState() {
     super.initState();
-    // The controller is created here once. It's passed down to the SVGAImage widget.
-    // The controller is not recreated, thus preventing duplication.
+    // إنشاء الكونترولر وتمريره لـ SVGAImage
     controller = SVGAAnimationController(vsync: this);
 
-    // Start the animation loop automatically once the controller is ready
+    // تشغيل الأنيميشن بشكل متكرر
     controller.startLooping();
-    controller.initializeSound(); // Make sure sound is initialized if applicable
+    controller.initializeSound(); // تشغيل الصوت إذا كان مدعومًا
   }
 
   @override
   void dispose() {
-    // Proper cleanup of the controller to avoid memory leaks
+    // تنظيف الكونترولر لتجنب تسرب الذاكرة
     controller.dispose();
     super.dispose();
   }
@@ -147,7 +145,7 @@ class _SVGAAnimationPageState extends State<SVGAAnimationPage> with TickerProvid
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        // The controller is passed down to SVGAImage, and it's reused, not duplicated
+        // تمرير الكونترولر إلى SVGAImage لإعادة استخدامه
         child: SVGAImage(controller: controller),
       ),
     );
