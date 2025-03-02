@@ -15,7 +15,8 @@ class SVGAImage extends StatelessWidget {
 
     return IgnorePointer(
       child: CustomPaint(
-        painter: _SVGAPainter(controller),
+        // ✅ بدل `_SVGAPainter`، استخدم `SVGAPlayer()` أو عرّف `_SVGAPainter` لو عندك الكود بتاعه
+        painter: SVGAPlayer(controller),
         size: Size(controller.videoItem!.params.viewBoxWidth, controller.videoItem!.params.viewBoxHeight),
       ),
     );
@@ -30,7 +31,8 @@ class SVGAAnimationController extends AnimationController {
 
   SVGAAnimationController({required TickerProvider vsync}) : super(vsync: vsync, duration: Duration.zero);
 
-  set videoItem(MovieEntity? value) async {
+  // ✅ استبدال `setter` بدالة عادية `setVideoItem`
+  Future<void> setVideoItem(MovieEntity? value) async {
     if (_isDisposed) return;
     if (isAnimating) stop();
     _videoItem = value;
@@ -73,17 +75,17 @@ class SVGAAnimationController extends AnimationController {
     });
 
     _audioPlayer.onPlayerComplete.listen((event) {
-      _playAudio(); // إعادة تشغيل الصوت عند الانتهاء
+      _playAudio();
     });
 
-    forward(); // بدء تشغيل الأنيميشن
-    _playAudio(); // بدء تشغيل الصوت متزامنًا مع الأنيميشن
+    forward();
+    _playAudio();
   }
 
   Future<void> _playAudio() async {
     try {
       if (_audioFile != null && _audioFile!.existsSync()) {
-        await _audioPlayer.stop(); // إيقاف الصوت قبل إعادة تشغيله
+        await _audioPlayer.stop();
         await _audioPlayer.seek(Duration.zero);
         await _audioPlayer.play(DeviceFileSource(_audioFile!.path));
       }
