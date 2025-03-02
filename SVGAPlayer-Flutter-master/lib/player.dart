@@ -67,9 +67,10 @@ class _SVGAPainter extends CustomPainter {
 class SVGAAnimationController extends AnimationController {
   MovieEntity? _videoItem;
   bool _isDisposed = false;
-  final AudioHandler audioHandler = AudioHandler(); // ✅ إضافة معالج الصوت
+  final AudioHandler audioHandler; // ✅ تمرير معالج الصوت
 
-  SVGAAnimationController({required TickerProvider vsync}) : super(vsync: vsync, duration: Duration.zero);
+  SVGAAnimationController({required TickerProvider vsync, required this.audioHandler}) 
+      : super(vsync: vsync, duration: Duration.zero);
 
   set videoItem(MovieEntity? value) {
     if (_isDisposed) return;
@@ -99,17 +100,19 @@ class SVGAAnimationController extends AnimationController {
     super.dispose();
   }
 
-  // ✅ تشغيل الأنيميشن مع الصوت وإعادة التشغيل بعد انتهاء الصوت
+  // ✅ تشغيل SVGA وبعدها تشغيل الصوت، ثم إعادة SVGA بعد انتهاء الصوت
   void startLooping() {
     addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
-        await Future.delayed(Duration(milliseconds: 500)); // انتظار قبل إعادة التشغيل
-        audioHandler.playAudioFromSVGA(videoItem!); // تشغيل الصوت
-        forward(from: 0); // إعادة تشغيل الأنيميشن
+        audioHandler.playAudioFromSVGA(videoItem!); // تشغيل الصوت بعد انتهاء SVGA
       }
     });
-    audioHandler.playAudioFromSVGA(videoItem!); // تشغيل الصوت مع البداية
-    forward();
+
+    audioHandler.onAudioComplete = () { 
+      forward(from: 0); // إعادة تشغيل SVGA بعد انتهاء الصوت
+    };
+
+    forward(); // تشغيل SVGA في البداية
   }
 }
 
@@ -122,17 +125,20 @@ class SVGAAnimationPage extends StatefulWidget {
 
 class _SVGAAnimationPageState extends State<SVGAAnimationPage> with TickerProviderStateMixin {
   late SVGAAnimationController controller;
+  late AudioHandler audioHandler;
 
   @override
   void initState() {
     super.initState();
-    controller = SVGAAnimationController(vsync: this);
-    controller.startLooping(); // ✅ تشغيل الأنيميشن مع الصوت تلقائياً
+    audioHandler = AudioHandler(); 
+    controller = SVGAAnimationController(vsync: this, audioHandler: audioHandler);
+    controller.startLooping(); // ✅ تشغيل SVGA والصوت بالتناوب
   }
 
   @override
   void dispose() {
     controller.dispose();
+    audioHandler.dispose();
     super.dispose();
   }
 
