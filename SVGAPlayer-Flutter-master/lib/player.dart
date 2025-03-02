@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:svgaplayer_flutter/proto/svga.pb.dart';
 import 'package:svgaplayer_flutter/parser.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'dart:ui' as ui;
+import 'audio_handler.dart';
 
 class SVGAImage extends StatelessWidget {
   final SVGAAnimationController controller;
 
-  // The controller is passed from the parent widget, preventing duplication.
   const SVGAImage({Key? key, required this.controller}) : super(key: key);
 
   @override
@@ -66,6 +67,7 @@ class _SVGAPainter extends CustomPainter {
 class SVGAAnimationController extends AnimationController {
   MovieEntity? _videoItem;
   bool _isDisposed = false;
+  final AudioHandler audioHandler = AudioHandler(); // ✅ إضافة معالج الصوت
 
   SVGAAnimationController({required TickerProvider vsync}) : super(vsync: vsync, duration: Duration.zero);
 
@@ -93,23 +95,21 @@ class SVGAAnimationController extends AnimationController {
   void dispose() {
     _videoItem = null;
     _isDisposed = true;
+    audioHandler.dispose(); // ✅ تنظيف الصوت عند التخلص من الكائن
     super.dispose();
   }
 
-  // ✅ تشغيل الأنيميشن تلقائياً عند الانتهاء
+  // ✅ تشغيل الأنيميشن مع الصوت وإعادة التشغيل بعد انتهاء الصوت
   void startLooping() {
-    addStatusListener((status) {
+    addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
-        reset(); // إعادة تعيين الأنيميشن
-        forward(); // تشغيله مرة أخرى
+        await Future.delayed(Duration(milliseconds: 500)); // انتظار قبل إعادة التشغيل
+        audioHandler.playAudioFromSVGA(videoItem!); // تشغيل الصوت
+        forward(from: 0); // إعادة تشغيل الأنيميشن
       }
     });
-    forward(); // تشغيل الأنيميشن مباشرة عند الاستدعاء
-  }
-
-  // تشغيل الصوت (لو متاح في المكتبة)
-  void initializeSound() {
-    // خاصية افتراضية لتفعيل الصوت حسب دعم مكتبة SVGA
+    audioHandler.playAudioFromSVGA(videoItem!); // تشغيل الصوت مع البداية
+    forward();
   }
 }
 
@@ -126,17 +126,12 @@ class _SVGAAnimationPageState extends State<SVGAAnimationPage> with TickerProvid
   @override
   void initState() {
     super.initState();
-    // إنشاء الكونترولر وتمريره لـ SVGAImage
     controller = SVGAAnimationController(vsync: this);
-
-    // تشغيل الأنيميشن بشكل متكرر
-    controller.startLooping();
-    controller.initializeSound(); // تشغيل الصوت إذا كان مدعومًا
+    controller.startLooping(); // ✅ تشغيل الأنيميشن مع الصوت تلقائياً
   }
 
   @override
   void dispose() {
-    // تنظيف الكونترولر لتجنب تسرب الذاكرة
     controller.dispose();
     super.dispose();
   }
@@ -145,7 +140,6 @@ class _SVGAAnimationPageState extends State<SVGAAnimationPage> with TickerProvid
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        // تمرير الكونترولر إلى SVGAImage لإعادة استخدامه
         child: SVGAImage(controller: controller),
       ),
     );
