@@ -98,7 +98,6 @@ class SVGAAnimationController extends AnimationController {
 
   // Add logic to restart the animation when it finishes and ensure it loops
   void startLooping() {
-    // This listener checks if the animation has completed (value >= 1.0) and then resets and restarts it
     addListener(() {
       if (value >= 1.0) {
         reset(); // Reset the animation to the beginning
@@ -106,6 +105,12 @@ class SVGAAnimationController extends AnimationController {
       }
     });
     forward(); // Start the animation immediately
+  }
+
+  // Optional: Ensure sound is played properly
+  void initializeSound() {
+    // Hypothetical property to enable sound (depends on SVGA library)
+    // audioEnabled = true;
   }
 }
 
@@ -128,6 +133,7 @@ class _SVGAAnimationPageState extends State<SVGAAnimationPage> with TickerProvid
     
     // Start the animation loop automatically once the controller is ready
     controller.startLooping();
+    controller.initializeSound(); // Make sure sound is initialized if applicable
   }
 
   @override
